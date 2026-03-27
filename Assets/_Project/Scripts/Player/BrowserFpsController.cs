@@ -41,7 +41,9 @@ public class BrowserFpsController : MonoBehaviour
     private Vector3 verticalVelocity;
     private float pitch;
     private bool isCursorLocked;
+    private bool jumpConsumed;
     private Vector3 initialSpawnPosition;
+    private readonly Collider[] groundCheckResults = new Collider[8];
 
     public event Action<bool> CursorLockStateChanged;
 
@@ -175,11 +177,7 @@ public class BrowserFpsController : MonoBehaviour
             moveInput.Normalize();
         }
 
-        bool isGrounded = Physics.CheckSphere(
-            groundCheck.position,
-            groundCheckRadius,
-            groundMask,
-            QueryTriggerInteraction.Ignore);
+        bool isGrounded = IsGrounded();
 
         if (isGrounded && verticalVelocity.y < 0f)
         {
@@ -192,10 +190,17 @@ public class BrowserFpsController : MonoBehaviour
         Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
         characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
 
+        bool jumpHeld = keyboard != null && keyboard.spaceKey.isPressed;
+        if (isGrounded && !jumpHeld)
+        {
+            jumpConsumed = false;
+        }
+
         bool wantsJump = keyboard != null && keyboard.spaceKey.wasPressedThisFrame;
-        if (isGrounded && wantsJump)
+        if (isGrounded && !jumpConsumed && wantsJump)
         {
             verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            jumpConsumed = true;
         }
 
         verticalVelocity.y += gravity * Time.deltaTime;
@@ -282,5 +287,33 @@ public class BrowserFpsController : MonoBehaviour
         }
 
         return rawPitch;
+    }
+
+    private bool IsGrounded()
+    {
+        int hitCount = Physics.OverlapSphereNonAlloc(
+            groundCheck.position,
+            groundCheckRadius,
+            groundCheckResults,
+            groundMask,
+            QueryTriggerInteraction.Ignore);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider hitCollider = groundCheckResults[i];
+            if (hitCollider == null)
+            {
+                continue;
+            }
+
+            if (hitCollider.transform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -80,6 +80,7 @@ public static class BrowserPrototypeSceneBuilder
         Material pathMaterial = CreateMaterial(new Color(0.42f, 0.42f, 0.45f));
         Material platformMaterial = CreateMaterial(new Color(0.45f, 0.36f, 0.3f));
         Material wallMaterial = CreateMaterial(new Color(0.38f, 0.34f, 0.3f));
+        Material waterMaterial = CreateMaterial(new Color(0.14f, 0.42f, 0.62f));
 
         Transform geometryRoot = new GameObject("Geometry").transform;
         geometryRoot.SetParent(worldRoot);
@@ -110,6 +111,7 @@ public static class BrowserPrototypeSceneBuilder
 
         CreateBoundaries(geometryRoot, wallMaterial);
         CreatePushBoxes(worldRoot, platformMaterial);
+        CreateWaterArea(worldRoot, wallMaterial, waterMaterial);
     }
 
     private static void CreateBoundaries(Transform parent, Material wallMaterial)
@@ -136,6 +138,9 @@ public static class BrowserPrototypeSceneBuilder
 
         Vector3[] boxPositions =
         {
+            new Vector3(-2f, 1.5f, 2f),
+            new Vector3(0f, 1.5f, 2.5f),
+            new Vector3(2f, 1.5f, 1.5f),
             new Vector3(-3f, 0.6f, -12f),
             new Vector3(0f, 0.6f, -10f),
             new Vector3(3f, 0.6f, -8f),
@@ -155,7 +160,79 @@ public static class BrowserPrototypeSceneBuilder
             body.mass = 6f;
             body.linearDamping = 0.2f;
             body.angularDamping = 0.2f;
+
+            BrowserPrototypeBuoyancyBody buoyancyBody = box.AddComponent<BrowserPrototypeBuoyancyBody>();
+            buoyancyBody.AutoConfigureSamplePointsFromCollider();
         }
+    }
+
+    private static void CreateWaterArea(Transform worldRoot, Material basinMaterial, Material waterMaterial)
+    {
+        Transform waterRoot = new GameObject("WaterArea").transform;
+        waterRoot.SetParent(worldRoot);
+
+        Vector3 center = new Vector3(0f, 0.2f, 2f);
+        float width = 16f;
+        float length = 10f;
+        float depth = 2.6f;
+        float wallThickness = 0.5f;
+
+        GameObject basinFloor = CreatePrimitiveCube(
+            "WaterBasinFloor",
+            center + new Vector3(0f, -depth - 0.25f, 0f),
+            new Vector3(width, 0.5f, length),
+            waterRoot);
+        ApplyMaterial(basinFloor, basinMaterial);
+
+        GameObject basinNorth = CreatePrimitiveCube(
+            "WaterBasinNorth",
+            center + new Vector3(0f, -depth * 0.5f, (length * 0.5f) - (wallThickness * 0.5f)),
+            new Vector3(width, depth, wallThickness),
+            waterRoot);
+        GameObject basinSouth = CreatePrimitiveCube(
+            "WaterBasinSouth",
+            center + new Vector3(0f, -depth * 0.5f, -(length * 0.5f) + (wallThickness * 0.5f)),
+            new Vector3(width, depth, wallThickness),
+            waterRoot);
+        GameObject basinEast = CreatePrimitiveCube(
+            "WaterBasinEast",
+            center + new Vector3((width * 0.5f) - (wallThickness * 0.5f), -depth * 0.5f, 0f),
+            new Vector3(wallThickness, depth, length),
+            waterRoot);
+        GameObject basinWest = CreatePrimitiveCube(
+            "WaterBasinWest",
+            center + new Vector3(-(width * 0.5f) + (wallThickness * 0.5f), -depth * 0.5f, 0f),
+            new Vector3(wallThickness, depth, length),
+            waterRoot);
+
+        ApplyMaterial(basinNorth, basinMaterial);
+        ApplyMaterial(basinSouth, basinMaterial);
+        ApplyMaterial(basinEast, basinMaterial);
+        ApplyMaterial(basinWest, basinMaterial);
+
+        GameObject surfaceObject = new GameObject("WaterSurface");
+        surfaceObject.transform.SetParent(waterRoot);
+        surfaceObject.transform.position = center;
+        surfaceObject.AddComponent<MeshFilter>();
+        MeshRenderer waterRenderer = surfaceObject.AddComponent<MeshRenderer>();
+        if (waterMaterial != null)
+        {
+            waterRenderer.sharedMaterial = waterMaterial;
+        }
+
+        BrowserPrototypeWaterSurface waterSurface = surfaceObject.AddComponent<BrowserPrototypeWaterSurface>();
+        waterSurface.Configure(width - 0.8f, length - 0.8f, 26, 18);
+
+        GameObject volumeObject = new GameObject("WaterVolume");
+        volumeObject.transform.SetParent(waterRoot);
+        volumeObject.transform.position = center;
+        BoxCollider waterCollider = volumeObject.AddComponent<BoxCollider>();
+        waterCollider.isTrigger = true;
+        waterCollider.center = new Vector3(0f, -depth * 0.5f, 0f);
+        waterCollider.size = new Vector3(width - 0.9f, depth, length - 0.9f);
+
+        BrowserPrototypeWaterVolume waterVolume = volumeObject.AddComponent<BrowserPrototypeWaterVolume>();
+        waterVolume.Configure(waterSurface, waterCollider);
     }
 
     private static Transform CreateRespawnPoint(Vector3 position, Transform parent)
