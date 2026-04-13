@@ -188,6 +188,7 @@ public class BrowserFpsController : MonoBehaviour
         bool isHoldingForward = false;
         bool pressedForwardThisFrame = false;
         bool wantsCrouch = false;
+        bool wantsSprintKey = false;
 
         if (keyboard != null)
         {
@@ -198,7 +199,8 @@ public class BrowserFpsController : MonoBehaviour
             }
 
             pressedForwardThisFrame = keyboard.wKey.wasPressedThisFrame;
-            wantsCrouch = keyboard.leftShiftKey.isPressed;
+            wantsSprintKey = keyboard.leftShiftKey.isPressed;
+            wantsCrouch = keyboard.leftCtrlKey.isPressed;
 
             if (keyboard.sKey.isPressed)
             {
@@ -255,7 +257,7 @@ public class BrowserFpsController : MonoBehaviour
             }
         }
 
-        bool wantsSprint = allowDoubleTapSprint && doubleTapSprintActive && moveInput.y > 0f && !isCrouching;
+        bool wantsSprint = (wantsSprintKey || (allowDoubleTapSprint && doubleTapSprintActive)) && moveInput.y > 0f && !isCrouching;
         float currentSpeed = isCrouching ? crouchSpeed : wantsSprint ? sprintSpeed : moveSpeed;
         float movementControl = isGrounded ? 1f : airControl;
 

@@ -547,7 +547,9 @@ MonoBehaviour:
 
     WASD = Move
 
-    Shift = Crouch
+    Shift = Sprint
+
+    Left Ctrl = Crouch
 
     Double-tap W = Sprint
 
@@ -1673,7 +1675,9 @@ MonoBehaviour:
 
     WASD = Move
 
-    Shift = Crouch
+    Shift = Sprint
+
+    Left Ctrl = Crouch
 
     Double-tap W = Sprint
 
