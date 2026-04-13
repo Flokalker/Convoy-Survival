@@ -16,8 +16,12 @@ public class BrowserFpsController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float moveSpeed = 4.5f;
     [SerializeField, Min(0.1f)] private float sprintSpeed = 7f;
     [SerializeField, Min(0.1f)] private float jumpHeight = 1.2f;
+    [SerializeField, Range(0f, 1f)] private float airControl = 0.45f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundedVerticalVelocity = -2f;
+    [SerializeField, Min(0f)] private float coyoteTime = 0.12f;
+    [SerializeField, Min(0f)] private float jumpBufferTime = 0.12f;
+    [SerializeField, Min(1f)] private float maxFallSpeed = 30f;
 
     [Header("Ground Check")]
     [SerializeField, Min(0.01f)] private float groundCheckRadius = 0.25f;
@@ -42,6 +46,8 @@ public class BrowserFpsController : MonoBehaviour
     private float pitch;
     private bool isCursorLocked;
     private bool jumpConsumed;
+    private float lastJumpPressedTime = float.NegativeInfinity;
+    private float lastGroundedTime = float.NegativeInfinity;
     private Vector3 initialSpawnPosition;
     private readonly Collider[] groundCheckResults = new Collider[8];
 
@@ -100,6 +106,14 @@ public class BrowserFpsController : MonoBehaviour
     private void OnApplicationFocus(bool hasFocus)
     {
         if (!hasFocus && isCursorLocked)
+        {
+            SetCursorLocked(false);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (isCursorLocked)
         {
             SetCursorLocked(false);
         }
@@ -178,6 +192,10 @@ public class BrowserFpsController : MonoBehaviour
         }
 
         bool isGrounded = IsGrounded();
+        if (isGrounded)
+        {
+            lastGroundedTime = Time.time;
+        }
 
         if (isGrounded && verticalVelocity.y < 0f)
         {
@@ -186,9 +204,10 @@ public class BrowserFpsController : MonoBehaviour
 
         bool wantsSprint = keyboard != null && keyboard.leftShiftKey.isPressed;
         float currentSpeed = wantsSprint ? sprintSpeed : moveSpeed;
+        float movementControl = isGrounded ? 1f : airControl;
 
         Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
-        characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
+        Vector3 horizontalVelocity = moveDirection * (currentSpeed * movementControl);
 
         bool jumpHeld = keyboard != null && keyboard.spaceKey.isPressed;
         if (isGrounded && !jumpHeld)
@@ -197,14 +216,33 @@ public class BrowserFpsController : MonoBehaviour
         }
 
         bool wantsJump = keyboard != null && keyboard.spaceKey.wasPressedThisFrame;
-        if (isGrounded && !jumpConsumed && wantsJump)
+        if (wantsJump)
+        {
+            lastJumpPressedTime = Time.time;
+        }
+
+        bool canUseBufferedJump = Time.time <= lastJumpPressedTime + jumpBufferTime;
+        bool canUseCoyoteJump = isGrounded || Time.time <= lastGroundedTime + coyoteTime;
+        if (!jumpConsumed && canUseBufferedJump && canUseCoyoteJump)
         {
             verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             jumpConsumed = true;
+            lastJumpPressedTime = float.NegativeInfinity;
+            isGrounded = false;
         }
 
-        verticalVelocity.y += gravity * Time.deltaTime;
-        characterController.Move(verticalVelocity * Time.deltaTime);
+        verticalVelocity.y = Mathf.Max(verticalVelocity.y + gravity * Time.deltaTime, -maxFallSpeed);
+
+        CollisionFlags collisionFlags = characterController.Move((horizontalVelocity + verticalVelocity) * Time.deltaTime);
+        if ((collisionFlags & CollisionFlags.Above) != 0 && verticalVelocity.y > 0f)
+        {
+            verticalVelocity.y = 0f;
+        }
+
+        if ((collisionFlags & CollisionFlags.Below) != 0 && verticalVelocity.y < 0f)
+        {
+            verticalVelocity.y = groundedVerticalVelocity;
+        }
     }
 
     private void HandleRespawn()
@@ -236,6 +274,9 @@ public class BrowserFpsController : MonoBehaviour
         }
 
         verticalVelocity = Vector3.zero;
+        jumpConsumed = false;
+        lastJumpPressedTime = float.NegativeInfinity;
+        lastGroundedTime = Time.time;
     }
 
     public void SetCursorLocked(bool locked)
