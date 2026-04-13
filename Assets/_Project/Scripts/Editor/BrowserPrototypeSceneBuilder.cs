@@ -259,7 +259,7 @@ public static class BrowserPrototypeSceneBuilder
 
         GameObject cameraRootObject = new GameObject("CameraRoot");
         cameraRootObject.transform.SetParent(player.transform, false);
-        cameraRootObject.transform.localPosition = new Vector3(0f, 1.6f, 0f);
+        cameraRootObject.transform.localPosition = new Vector3(0f, 1.68f, 0f);
 
         GameObject cameraObject = new GameObject("PlayerCamera");
         cameraObject.transform.SetParent(cameraRootObject.transform, false);
