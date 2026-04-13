@@ -12,15 +12,18 @@ public class GroundStripes : MonoBehaviour
     [SerializeField] private Color stripeColor = new Color(0.9f, 0.9f, 0.9f, 1f);
 
     private const string StripeRootName = "Stripes";
+    private bool buildQueued;
 
     private void OnEnable()
     {
-        BuildStripes();
-    }
-
-    private void OnValidate()
-    {
-        BuildStripes();
+        if (Application.isPlaying)
+        {
+            BuildStripes();
+        }
+        else
+        {
+            QueueBuildInEditor();
+        }
     }
 
     private void BuildStripes()
@@ -29,14 +32,7 @@ public class GroundStripes : MonoBehaviour
         while (stripeRoot.childCount > 0)
         {
             Transform child = stripeRoot.GetChild(0);
-            if (Application.isPlaying)
-            {
-                Destroy(child.gameObject);
-            }
-            else
-            {
-                DestroyImmediate(child.gameObject);
-            }
+            DestroySafely(child.gameObject);
         }
 
         float totalSpacing = stripeLength + stripeGap;
@@ -52,6 +48,26 @@ public class GroundStripes : MonoBehaviour
             ApplyTint(stripe, stripeColor);
             RemoveColliderIfPresent(stripe);
         }
+    }
+
+    private void QueueBuildInEditor()
+    {
+#if UNITY_EDITOR
+        if (buildQueued)
+        {
+            return;
+        }
+
+        buildQueued = true;
+        UnityEditor.EditorApplication.delayCall += () =>
+        {
+            buildQueued = false;
+            if (this != null)
+            {
+                BuildStripes();
+            }
+        };
+#endif
     }
 
     private Transform GetOrCreateStripeRoot()
@@ -102,13 +118,23 @@ public class GroundStripes : MonoBehaviour
             return;
         }
 
+        DestroySafely(collider);
+    }
+
+    private static void DestroySafely(Object target)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
         if (Application.isPlaying)
         {
-            Destroy(collider);
+            Destroy(target);
         }
         else
         {
-            DestroyImmediate(collider);
+            DestroyImmediate(target);
         }
     }
 }
