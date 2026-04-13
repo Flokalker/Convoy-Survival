@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class BrowserFpsController : MonoBehaviour
 {
+    private static bool forceCursorUnlocked = true;
+
     [Header("References")]
     [SerializeField] private CharacterController characterController;
     [SerializeField] private Transform cameraRoot;
@@ -28,6 +30,7 @@ public class BrowserFpsController : MonoBehaviour
     [SerializeField] private bool invertY = false;
     [SerializeField, Range(-89f, 0f)] private float minPitch = -80f;
     [SerializeField, Range(0f, 89f)] private float maxPitch = 80f;
+    [SerializeField] private bool allowLookWhileCursorVisible = true;
 
     [Header("Cursor")]
     [SerializeField] private bool lockCursorOnStart = true;
@@ -46,6 +49,18 @@ public class BrowserFpsController : MonoBehaviour
     public event Action<bool> CursorLockStateChanged;
 
     public bool IsCursorLocked => isCursorLocked;
+
+    public static bool ForceCursorUnlocked => forceCursorUnlocked;
+
+    public static void SetForceCursorUnlocked(bool enabled)
+    {
+        forceCursorUnlocked = enabled;
+        if (enabled)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
 
     public void ConfigureReferences(Transform cameraRootTransform, Transform groundCheckTransform, Transform respawnPointTransform)
     {
@@ -84,7 +99,7 @@ public class BrowserFpsController : MonoBehaviour
     {
         initialSpawnPosition = transform.position;
         pitch = NormalizePitch(cameraRoot.localEulerAngles.x);
-        SetCursorLocked(lockCursorOnStart);
+        SetCursorLocked(lockCursorOnStart && !forceCursorUnlocked);
     }
 
     private void Update()
@@ -105,6 +120,18 @@ public class BrowserFpsController : MonoBehaviour
 
     private void HandleCursorInput()
     {
+        if (forceCursorUnlocked)
+        {
+            if (isCursorLocked)
+            {
+                SetCursorLocked(false);
+            }
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            return;
+        }
+
         Keyboard keyboard = Keyboard.current;
         Mouse mouse = Mouse.current;
 
@@ -121,13 +148,25 @@ public class BrowserFpsController : MonoBehaviour
 
     private void HandleLook()
     {
-        if (!isCursorLocked || cameraRoot == null)
+        if (cameraRoot == null)
         {
             return;
         }
 
         Mouse mouse = Mouse.current;
         if (mouse == null)
+        {
+            return;
+        }
+
+        bool canLook = isCursorLocked;
+        if (!canLook && allowLookWhileCursorVisible)
+        {
+            // In cursor-visible mode, hold RMB to look around.
+            canLook = mouse.rightButton.isPressed;
+        }
+
+        if (!canLook)
         {
             return;
         }
