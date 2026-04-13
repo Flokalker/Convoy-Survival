@@ -8,19 +8,14 @@ using UnityEditor;
 [DisallowMultipleComponent]
 public class WeaponSceneAutoSetup : MonoBehaviour
 {
-    [SerializeField] private string targetSceneName = "BrowserPrototype";
+    [SerializeField] private string targetSceneName = "";
     [SerializeField] private bool onlyWhenNoSpawnerExists = true;
+    [SerializeField] private string editorWeaponRootFolder = "Assets/MR POLY";
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AutoInstall()
     {
-        if (FindObjectOfType<WeaponSceneAutoSetup>() != null)
-        {
-            return;
-        }
-
-        GameObject setupObject = new GameObject("WeaponSceneAutoSetup");
-        setupObject.AddComponent<WeaponSceneAutoSetup>();
+        // Legacy setup disabled. Replaced by SurvivalWeaponSceneBootstrap.
     }
 
     private void Awake()
@@ -33,6 +28,11 @@ public class WeaponSceneAutoSetup : MonoBehaviour
         }
 
         Camera playerCamera = Camera.main;
+        if (playerCamera == null)
+        {
+            playerCamera = FindFirstObjectByType<Camera>();
+        }
+
         if (playerCamera == null)
         {
             Debug.LogWarning("WeaponSceneAutoSetup: No Main Camera found. Skipping weapon setup.", this);
@@ -51,23 +51,29 @@ public class WeaponSceneAutoSetup : MonoBehaviour
         controller.Configure(playerCamera, holdPoint);
 
         WeaponDropSpawner spawner = FindObjectOfType<WeaponDropSpawner>();
-        if (onlyWhenNoSpawnerExists && spawner != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
 
         if (spawner == null)
         {
             GameObject spawnerObject = new GameObject("WeaponDropSpawner");
             spawner = spawnerObject.AddComponent<WeaponDropSpawner>();
         }
+        else if (onlyWhenNoSpawnerExists)
+        {
+            // Keep using existing spawner, but still ensure it is configured.
+        }
 
-        WeaponDropSpawner.WeaponDropDefinition[] definitions = LoadWeaponDefinitions();
+        WeaponDropSpawner.WeaponDropDefinition[] definitions = LoadWeaponDefinitions(editorWeaponRootFolder);
         if (definitions.Length > 0)
         {
-            spawner.Configure(definitions, 10, 48f, ~0);
+            spawner.Configure(definitions, 8, 32f, ~0);
+            spawner.SetSpawnCenter(playerCamera.transform);
             spawner.SpawnDrops(playerCamera.transform.position);
+            EquipStarterPistol(controller, definitions);
+            Debug.Log($"WeaponSceneAutoSetup: Loaded {definitions.Length} weapon prefabs from '{editorWeaponRootFolder}'.");
+        }
+        else
+        {
+            Debug.LogWarning($"WeaponSceneAutoSetup: No weapon prefabs found under '{editorWeaponRootFolder}'.");
         }
 
         Destroy(gameObject);
@@ -88,15 +94,26 @@ public class WeaponSceneAutoSetup : MonoBehaviour
         return holdPointObject.transform;
     }
 
-    private static WeaponDropSpawner.WeaponDropDefinition[] LoadWeaponDefinitions()
+    private static WeaponDropSpawner.WeaponDropDefinition[] LoadWeaponDefinitions(string weaponRootFolder)
     {
         List<WeaponDropSpawner.WeaponDropDefinition> definitions = new List<WeaponDropSpawner.WeaponDropDefinition>();
 
 #if UNITY_EDITOR
-        string[] guids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/MR POLY/Low Poly Weapons Set/Prefabs" });
+        string[] searchFolders = string.IsNullOrWhiteSpace(weaponRootFolder)
+            ? new[] { "Assets/MR POLY" }
+            : new[] { weaponRootFolder };
+        string[] guids = AssetDatabase.FindAssets("t:Prefab", searchFolders);
         for (int i = 0; i < guids.Length; i++)
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
+            if (assetPath.IndexOf("weapon", System.StringComparison.OrdinalIgnoreCase) < 0 &&
+                assetPath.IndexOf("rifle", System.StringComparison.OrdinalIgnoreCase) < 0 &&
+                assetPath.IndexOf("pistol", System.StringComparison.OrdinalIgnoreCase) < 0 &&
+                assetPath.IndexOf("shotgun", System.StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                continue;
+            }
+
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
             if (prefab == null)
             {
@@ -165,5 +182,35 @@ public class WeaponSceneAutoSetup : MonoBehaviour
         definition.damage = 24f;
         definition.fireRate = 6f;
         definition.range = 120f;
+    }
+
+    private static void EquipStarterPistol(WeaponController controller, WeaponDropSpawner.WeaponDropDefinition[] definitions)
+    {
+        if (controller == null || definitions == null || definitions.Length == 0)
+        {
+            return;
+        }
+
+        WeaponDropSpawner.WeaponDropDefinition starter = null;
+        for (int i = 0; i < definitions.Length; i++)
+        {
+            if (definitions[i] == null || string.IsNullOrWhiteSpace(definitions[i].weaponName))
+            {
+                continue;
+            }
+
+            if (definitions[i].weaponName.ToLowerInvariant().Contains("pistol"))
+            {
+                starter = definitions[i];
+                break;
+            }
+        }
+
+        if (starter == null)
+        {
+            starter = definitions[0];
+        }
+
+        controller.EquipWeapon(starter.visualPrefab, starter.weaponName, starter.damage, starter.fireRate, starter.range);
     }
 }

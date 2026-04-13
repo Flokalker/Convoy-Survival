@@ -11,6 +11,9 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private Transform muzzleTransform;
     [SerializeField] private Transform recoilTarget;
     [SerializeField] private Transform weaponHoldPoint;
+    [SerializeField] private Vector3 equippedWeaponLocalPosition = Vector3.zero;
+    [SerializeField] private Vector3 equippedWeaponLocalEuler = Vector3.zero;
+    [SerializeField, Min(0.05f)] private float equippedWeaponTargetSize = 0.45f;
 
     [Header("Weapon Stats")]
     [SerializeField, Min(1f)] private float damage = 24f;
@@ -137,8 +140,8 @@ public class WeaponController : MonoBehaviour
 
         equippedWeaponVisualInstance = Instantiate(weaponVisualPrefab, weaponHoldPoint);
         equippedWeaponVisualInstance.name = string.Concat("Equipped_", equippedWeaponName);
-        equippedWeaponVisualInstance.transform.localPosition = Vector3.zero;
-        equippedWeaponVisualInstance.transform.localRotation = Quaternion.identity;
+        equippedWeaponVisualInstance.transform.localPosition = equippedWeaponLocalPosition;
+        equippedWeaponVisualInstance.transform.localRotation = Quaternion.Euler(equippedWeaponLocalEuler);
         equippedWeaponVisualInstance.transform.localScale = Vector3.one;
 
         Collider[] colliders = equippedWeaponVisualInstance.GetComponentsInChildren<Collider>(true);
@@ -146,6 +149,8 @@ public class WeaponController : MonoBehaviour
         {
             Destroy(colliders[i]);
         }
+
+        NormalizeVisualScale(equippedWeaponVisualInstance, equippedWeaponTargetSize);
     }
 
     private bool ReadFirePressed()
@@ -194,5 +199,29 @@ public class WeaponController : MonoBehaviour
 
         recoilTarget.localPosition = recoilStartLocalPos;
         recoilRoutine = null;
+    }
+
+    private static void NormalizeVisualScale(GameObject root, float targetLongestSide)
+    {
+        Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+        if (renderers.Length == 0)
+        {
+            return;
+        }
+
+        Bounds bounds = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+        {
+            bounds.Encapsulate(renderers[i].bounds);
+        }
+
+        float longest = Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z));
+        if (longest <= 0.001f)
+        {
+            return;
+        }
+
+        float scale = Mathf.Max(0.01f, targetLongestSide / longest);
+        root.transform.localScale *= scale;
     }
 }

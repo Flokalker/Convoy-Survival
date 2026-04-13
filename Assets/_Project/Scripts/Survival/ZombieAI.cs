@@ -43,7 +43,7 @@ public class ZombieAI : MonoBehaviour
     [SerializeField] private VariantStats runnerStats = new VariantStats
     {
         moveSpeed = 5.2f,
-        maxHealth = 75f,
+        maxHealth = 45f,
         attackDamage = 10f,
         meleeRange = 1.5f,
         attackRate = 1.4f,
@@ -54,7 +54,7 @@ public class ZombieAI : MonoBehaviour
     [SerializeField] private VariantStats tankStats = new VariantStats
     {
         moveSpeed = 2f,
-        maxHealth = 260f,
+        maxHealth = 140f,
         attackDamage = 28f,
         meleeRange = 2.2f,
         attackRate = 0.7f,
@@ -65,7 +65,7 @@ public class ZombieAI : MonoBehaviour
     [SerializeField] private VariantStats spitterStats = new VariantStats
     {
         moveSpeed = 2.8f,
-        maxHealth = 110f,
+        maxHealth = 70f,
         attackDamage = 13f,
         meleeRange = 1.6f,
         attackRate = 0.8f,

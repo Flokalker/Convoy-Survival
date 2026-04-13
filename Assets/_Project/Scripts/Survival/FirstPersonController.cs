@@ -5,8 +5,6 @@ using UnityEngine;
 [RequireComponent(typeof(InputHandler))]
 public class FirstPersonController : MonoBehaviour
 {
-    private static bool forceCursorUnlocked = true;
-
     [Header("References")]
     [SerializeField] private CharacterController characterController;
     [SerializeField] private InputHandler inputHandler;
@@ -31,16 +29,6 @@ public class FirstPersonController : MonoBehaviour
 
     public InputHandler InputHandler => inputHandler;
     public bool CanControl => canControl;
-
-    public static void SetForceCursorUnlocked(bool enabled)
-    {
-        forceCursorUnlocked = enabled;
-        if (enabled)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-    }
 
     private void Reset()
     {
@@ -76,24 +64,14 @@ public class FirstPersonController : MonoBehaviour
 
     private void Start()
     {
-        if (!forceCursorUnlocked)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
     {
         if (!canControl)
         {
-            return;
-        }
-
-        if (forceCursorUnlocked)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
             return;
         }
 

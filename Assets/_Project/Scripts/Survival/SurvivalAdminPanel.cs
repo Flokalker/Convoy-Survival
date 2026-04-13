@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -8,12 +7,10 @@ using UnityEngine.UI;
 public class SurvivalAdminPanel : MonoBehaviour
 {
     [SerializeField] private string targetSceneName = "BrowserPrototype";
-    [SerializeField] private bool showCursorOnStart = true;
 
     private CombatAIManager combatManager;
     private PlayerStats playerStats;
     private Text godModeLabel;
-    private Text cursorModeLabel;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AutoInstall()
@@ -39,27 +36,7 @@ public class SurvivalAdminPanel : MonoBehaviour
         combatManager = FindObjectOfType<CombatAIManager>();
         playerStats = FindObjectOfType<PlayerStats>();
 
-        if (showCursorOnStart)
-        {
-            ForceCursorShown(true);
-        }
-
         BuildUi();
-    }
-
-    private void Update()
-    {
-        if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame)
-        {
-            ToggleCursorMode();
-        }
-
-        // Keep it forced each frame so gameplay scripts cannot re-lock it.
-        if (BrowserFpsController.ForceCursorUnlocked || IsFirstPersonForceUnlocked())
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
     }
 
     private void BuildUi()
@@ -97,12 +74,8 @@ public class SurvivalAdminPanel : MonoBehaviour
         CreateButton(panel.transform, font, "Spawn Spitter Wave (6)", 2, () => SpawnVariant(ZombieAI.ZombieVariant.Spitter, 6));
         CreateButton(panel.transform, font, "Spawn Mixed Wave (12)", 3, () => SpawnMixed(12));
         CreateButton(panel.transform, font, "Toggle Infinite Health", 4, ToggleGodMode);
-        CreateButton(panel.transform, font, "Toggle Cursor (F1)", 5, ToggleCursorMode);
-
-        godModeLabel = CreateLabel(panel.transform, font, 6, "GodModeStatus");
-        cursorModeLabel = CreateLabel(panel.transform, font, 7, "CursorStatus");
+        godModeLabel = CreateLabel(panel.transform, font, 5, "GodModeStatus");
         UpdateGodModeLabel();
-        UpdateCursorModeLabel();
     }
 
     private static void EnsureEventSystem()
@@ -223,37 +196,4 @@ public class SurvivalAdminPanel : MonoBehaviour
         godModeLabel.text = on ? "Infinite Health: ON" : "Infinite Health: OFF";
     }
 
-    private void ToggleCursorMode()
-    {
-        bool shouldShow = Cursor.lockState == CursorLockMode.Locked || !Cursor.visible;
-        ForceCursorShown(shouldShow);
-
-        UpdateCursorModeLabel();
-    }
-
-    private void UpdateCursorModeLabel()
-    {
-        if (cursorModeLabel == null)
-        {
-            return;
-        }
-
-        bool shown = Cursor.visible && Cursor.lockState == CursorLockMode.None;
-        cursorModeLabel.text = shown ? "Cursor: SHOWN" : "Cursor: LOCKED";
-        cursorModeLabel.color = shown ? new Color(0.55f, 1f, 0.55f, 1f) : new Color(1f, 0.55f, 0.55f, 1f);
-    }
-
-    private static void ForceCursorShown(bool shown)
-    {
-        BrowserFpsController.SetForceCursorUnlocked(shown);
-        FirstPersonController.SetForceCursorUnlocked(shown);
-        Cursor.lockState = shown ? CursorLockMode.None : CursorLockMode.Locked;
-        Cursor.visible = shown;
-    }
-
-    private static bool IsFirstPersonForceUnlocked()
-    {
-        // FirstPersonController keeps this internal; check actual cursor state as fallback.
-        return Cursor.visible && Cursor.lockState == CursorLockMode.None;
-    }
 }
