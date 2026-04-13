@@ -15,6 +15,7 @@ public class BrowserFpsController : MonoBehaviour
     [Header("Movement")]
     [SerializeField, Min(0.1f)] private float moveSpeed = 4.5f;
     [SerializeField, Min(0.1f)] private float sprintSpeed = 7f;
+    [SerializeField, Min(0.1f)] private float crouchSpeed = 2.25f;
     [SerializeField] private bool allowDoubleTapSprint = true;
     [SerializeField, Min(0.05f)] private float doubleTapSprintWindow = 0.3f;
     [SerializeField, Min(0.1f)] private float jumpHeight = 1.2f;
@@ -28,6 +29,11 @@ public class BrowserFpsController : MonoBehaviour
     [Header("Ground Check")]
     [SerializeField, Min(0.01f)] private float groundCheckRadius = 0.25f;
     [SerializeField] private LayerMask groundMask = ~0;
+
+    [Header("Crouch")]
+    [SerializeField, Min(0.5f)] private float crouchHeight = 1.2f;
+    [SerializeField, Min(0.1f)] private float crouchTransitionSpeed = 8f;
+    [SerializeField] private LayerMask crouchObstructionMask = ~0;
 
     [Header("Look")]
     [SerializeField, Min(0.01f)] private float mouseSensitivity = 0.15f;
@@ -49,10 +55,15 @@ public class BrowserFpsController : MonoBehaviour
     private bool isCursorLocked;
     private bool jumpConsumed;
     private bool doubleTapSprintActive;
+    private bool isCrouching;
     private float lastJumpPressedTime = float.NegativeInfinity;
     private float lastGroundedTime = float.NegativeInfinity;
     private float lastForwardTapTime = float.NegativeInfinity;
     private Vector3 initialSpawnPosition;
+    private float standingHeight;
+    private Vector3 standingCenter;
+    private float standingCameraLocalY;
+    private float crouchingCameraLocalY;
     private readonly Collider[] groundCheckResults = new Collider[8];
 
     public event Action<bool> CursorLockStateChanged;
@@ -95,6 +106,12 @@ public class BrowserFpsController : MonoBehaviour
     private void Start()
     {
         initialSpawnPosition = transform.position;
+        standingHeight = characterController.height;
+        standingCenter = characterController.center;
+        standingCameraLocalY = cameraRoot != null ? cameraRoot.localPosition.y : standingCenter.y;
+        crouchHeight = Mathf.Min(crouchHeight, standingHeight);
+        float crouchRatio = crouchHeight / Mathf.Max(0.01f, standingHeight);
+        crouchingCameraLocalY = standingCameraLocalY * crouchRatio;
         pitch = NormalizePitch(cameraRoot.localEulerAngles.x);
         SetCursorLocked(lockCursorOnStart);
     }
@@ -168,6 +185,7 @@ public class BrowserFpsController : MonoBehaviour
         Vector2 moveInput = Vector2.zero;
         bool isHoldingForward = false;
         bool pressedForwardThisFrame = false;
+        bool wantsCrouch = false;
 
         if (keyboard != null)
         {
@@ -178,6 +196,7 @@ public class BrowserFpsController : MonoBehaviour
             }
 
             pressedForwardThisFrame = keyboard.wKey.wasPressedThisFrame;
+            wantsCrouch = keyboard.leftShiftKey.isPressed;
 
             if (keyboard.sKey.isPressed)
             {
@@ -199,6 +218,8 @@ public class BrowserFpsController : MonoBehaviour
         {
             moveInput.Normalize();
         }
+
+        UpdateCrouchState(wantsCrouch);
 
         bool isGrounded = IsGrounded();
         if (isGrounded)
@@ -226,9 +247,8 @@ public class BrowserFpsController : MonoBehaviour
             doubleTapSprintActive = false;
         }
 
-        bool wantsSprint = keyboard != null && keyboard.leftShiftKey.isPressed;
-        wantsSprint |= allowDoubleTapSprint && doubleTapSprintActive && moveInput.y > 0f;
-        float currentSpeed = wantsSprint ? sprintSpeed : moveSpeed;
+        bool wantsSprint = allowDoubleTapSprint && doubleTapSprintActive && moveInput.y > 0f && !isCrouching;
+        float currentSpeed = isCrouching ? crouchSpeed : wantsSprint ? sprintSpeed : moveSpeed;
         float movementControl = isGrounded ? 1f : airControl;
 
         Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
@@ -301,9 +321,11 @@ public class BrowserFpsController : MonoBehaviour
         verticalVelocity = Vector3.zero;
         jumpConsumed = false;
         doubleTapSprintActive = false;
+        isCrouching = false;
         lastJumpPressedTime = float.NegativeInfinity;
         lastGroundedTime = Time.time;
         lastForwardTapTime = float.NegativeInfinity;
+        ApplyCharacterHeight(standingHeight);
     }
 
     public void SetCursorLocked(bool locked)
@@ -355,6 +377,47 @@ public class BrowserFpsController : MonoBehaviour
         }
 
         return rawPitch;
+    }
+
+    private void UpdateCrouchState(bool wantsCrouch)
+    {
+        if (wantsCrouch)
+        {
+            isCrouching = true;
+            doubleTapSprintActive = false;
+        }
+        else if (isCrouching && CanStandUp())
+        {
+            isCrouching = false;
+        }
+
+        float targetHeight = isCrouching ? crouchHeight : standingHeight;
+        ApplyCharacterHeight(targetHeight);
+    }
+
+    private void ApplyCharacterHeight(float targetHeight)
+    {
+        float newHeight = Mathf.MoveTowards(characterController.height, targetHeight, crouchTransitionSpeed * Time.deltaTime);
+        characterController.height = newHeight;
+        characterController.center = new Vector3(standingCenter.x, newHeight * 0.5f, standingCenter.z);
+
+        if (cameraRoot != null)
+        {
+            Vector3 localPosition = cameraRoot.localPosition;
+            float targetCameraY = isCrouching ? crouchingCameraLocalY : standingCameraLocalY;
+            localPosition.y = Mathf.MoveTowards(localPosition.y, targetCameraY, crouchTransitionSpeed * Time.deltaTime);
+            cameraRoot.localPosition = localPosition;
+        }
+    }
+
+    private bool CanStandUp()
+    {
+        float radius = characterController.radius * 0.95f;
+        Vector3 worldCenter = transform.TransformPoint(standingCenter);
+        Vector3 bottom = worldCenter + Vector3.down * ((standingHeight * 0.5f) - radius);
+        Vector3 top = worldCenter + Vector3.up * ((standingHeight * 0.5f) - radius);
+
+        return !Physics.CheckCapsule(bottom, top, radius, crouchObstructionMask, QueryTriggerInteraction.Ignore);
     }
 
     private bool IsGrounded()

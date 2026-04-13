@@ -17,7 +17,8 @@ public class BrowserPrototypeUiController : MonoBehaviour
     [SerializeField, TextArea(5, 12)] private string startOverlayMessage =
         "Browser Prototype\n\n" +
         "WASD = Move\n" +
-        "Shift or double-tap W = Sprint\n" +
+        "Shift = Crouch\n" +
+        "Double-tap W = Sprint\n" +
         "Space = Jump\n" +
         "Left Click = Lock Cursor\n" +
         "Escape = Release Cursor\n\n" +
