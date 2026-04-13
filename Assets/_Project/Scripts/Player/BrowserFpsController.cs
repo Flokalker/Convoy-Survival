@@ -17,7 +17,7 @@ public class BrowserFpsController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float sprintSpeed = 7f;
     [SerializeField, Min(0.1f)] private float crouchSpeed = 2.25f;
     [SerializeField] private bool allowDoubleTapSprint = true;
-    [SerializeField, Min(0.05f)] private float doubleTapSprintWindow = 0.3f;
+    [SerializeField, Min(0.05f)] private float doubleTapSprintWindow = 0.4f;
     [SerializeField, Min(0.1f)] private float jumpHeight = 1.2f;
     [SerializeField, Range(0f, 1f)] private float airControl = 0.45f;
     [SerializeField] private float gravity = -20f;
@@ -56,6 +56,7 @@ public class BrowserFpsController : MonoBehaviour
     private bool jumpConsumed;
     private bool doubleTapSprintActive;
     private bool isCrouching;
+    private int forwardTapCount;
     private float lastJumpPressedTime = float.NegativeInfinity;
     private float lastGroundedTime = float.NegativeInfinity;
     private float lastForwardTapTime = float.NegativeInfinity;
@@ -65,6 +66,7 @@ public class BrowserFpsController : MonoBehaviour
     private float standingCameraLocalY;
     private float crouchingCameraLocalY;
     private readonly Collider[] groundCheckResults = new Collider[8];
+    private readonly Collider[] crouchCheckResults = new Collider[8];
 
     public event Action<bool> CursorLockStateChanged;
 
@@ -234,17 +236,23 @@ public class BrowserFpsController : MonoBehaviour
 
         if (allowDoubleTapSprint && pressedForwardThisFrame)
         {
-            if (Time.time <= lastForwardTapTime + doubleTapSprintWindow)
+            forwardTapCount = Time.time <= lastForwardTapTime + doubleTapSprintWindow ? forwardTapCount + 1 : 1;
+            lastForwardTapTime = Time.time;
+
+            if (forwardTapCount >= 2)
             {
                 doubleTapSprintActive = true;
+                forwardTapCount = 0;
             }
-
-            lastForwardTapTime = Time.time;
         }
 
         if (!isHoldingForward || moveInput.y <= 0f)
         {
             doubleTapSprintActive = false;
+            if (!isHoldingForward)
+            {
+                forwardTapCount = 0;
+            }
         }
 
         bool wantsSprint = allowDoubleTapSprint && doubleTapSprintActive && moveInput.y > 0f && !isCrouching;
@@ -322,6 +330,7 @@ public class BrowserFpsController : MonoBehaviour
         jumpConsumed = false;
         doubleTapSprintActive = false;
         isCrouching = false;
+        forwardTapCount = 0;
         lastJumpPressedTime = float.NegativeInfinity;
         lastGroundedTime = Time.time;
         lastForwardTapTime = float.NegativeInfinity;
@@ -417,7 +426,31 @@ public class BrowserFpsController : MonoBehaviour
         Vector3 bottom = worldCenter + Vector3.down * ((standingHeight * 0.5f) - radius);
         Vector3 top = worldCenter + Vector3.up * ((standingHeight * 0.5f) - radius);
 
-        return !Physics.CheckCapsule(bottom, top, radius, crouchObstructionMask, QueryTriggerInteraction.Ignore);
+        int hitCount = Physics.OverlapCapsuleNonAlloc(
+            bottom,
+            top,
+            radius,
+            crouchCheckResults,
+            crouchObstructionMask,
+            QueryTriggerInteraction.Ignore);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider hitCollider = crouchCheckResults[i];
+            if (hitCollider == null)
+            {
+                continue;
+            }
+
+            if (hitCollider.transform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     private bool IsGrounded()
