@@ -158,8 +158,10 @@ public static class BrowserPrototypeSceneBuilder
 
             Rigidbody body = box.AddComponent<Rigidbody>();
             body.mass = 6f;
-            body.linearDamping = 0.2f;
-            body.angularDamping = 0.2f;
+            body.linearDamping = 0.35f;
+            body.angularDamping = 0.45f;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             BrowserPrototypeBuoyancyBody buoyancyBody = box.AddComponent<BrowserPrototypeBuoyancyBody>();
             buoyancyBody.AutoConfigureSamplePointsFromCollider();
