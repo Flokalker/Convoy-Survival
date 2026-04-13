@@ -424,7 +424,7 @@ public static class BrowserPrototypeSceneBuilder
         overlayText.text =
             "Browser Prototype\n\n" +
             "WASD = Move\n" +
-            "Shift = Sprint\n" +
+            "Shift or double-tap W = Sprint\n" +
             "Space = Jump\n" +
             "Left Click = Lock Cursor\n" +
             "Escape = Release Cursor\n\n" +

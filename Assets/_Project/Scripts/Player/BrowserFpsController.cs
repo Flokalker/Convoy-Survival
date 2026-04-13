@@ -15,6 +15,8 @@ public class BrowserFpsController : MonoBehaviour
     [Header("Movement")]
     [SerializeField, Min(0.1f)] private float moveSpeed = 4.5f;
     [SerializeField, Min(0.1f)] private float sprintSpeed = 7f;
+    [SerializeField] private bool allowDoubleTapSprint = true;
+    [SerializeField, Min(0.05f)] private float doubleTapSprintWindow = 0.3f;
     [SerializeField, Min(0.1f)] private float jumpHeight = 1.2f;
     [SerializeField, Range(0f, 1f)] private float airControl = 0.45f;
     [SerializeField] private float gravity = -20f;
@@ -46,8 +48,10 @@ public class BrowserFpsController : MonoBehaviour
     private float pitch;
     private bool isCursorLocked;
     private bool jumpConsumed;
+    private bool doubleTapSprintActive;
     private float lastJumpPressedTime = float.NegativeInfinity;
     private float lastGroundedTime = float.NegativeInfinity;
+    private float lastForwardTapTime = float.NegativeInfinity;
     private Vector3 initialSpawnPosition;
     private readonly Collider[] groundCheckResults = new Collider[8];
 
@@ -162,13 +166,18 @@ public class BrowserFpsController : MonoBehaviour
     {
         Keyboard keyboard = Keyboard.current;
         Vector2 moveInput = Vector2.zero;
+        bool isHoldingForward = false;
+        bool pressedForwardThisFrame = false;
 
         if (keyboard != null)
         {
             if (keyboard.wKey.isPressed)
             {
                 moveInput.y += 1f;
+                isHoldingForward = true;
             }
+
+            pressedForwardThisFrame = keyboard.wKey.wasPressedThisFrame;
 
             if (keyboard.sKey.isPressed)
             {
@@ -202,7 +211,23 @@ public class BrowserFpsController : MonoBehaviour
             verticalVelocity.y = groundedVerticalVelocity;
         }
 
+        if (allowDoubleTapSprint && pressedForwardThisFrame)
+        {
+            if (Time.time <= lastForwardTapTime + doubleTapSprintWindow)
+            {
+                doubleTapSprintActive = true;
+            }
+
+            lastForwardTapTime = Time.time;
+        }
+
+        if (!isHoldingForward || moveInput.y <= 0f)
+        {
+            doubleTapSprintActive = false;
+        }
+
         bool wantsSprint = keyboard != null && keyboard.leftShiftKey.isPressed;
+        wantsSprint |= allowDoubleTapSprint && doubleTapSprintActive && moveInput.y > 0f;
         float currentSpeed = wantsSprint ? sprintSpeed : moveSpeed;
         float movementControl = isGrounded ? 1f : airControl;
 
@@ -275,8 +300,10 @@ public class BrowserFpsController : MonoBehaviour
 
         verticalVelocity = Vector3.zero;
         jumpConsumed = false;
+        doubleTapSprintActive = false;
         lastJumpPressedTime = float.NegativeInfinity;
         lastGroundedTime = Time.time;
+        lastForwardTapTime = float.NegativeInfinity;
     }
 
     public void SetCursorLocked(bool locked)

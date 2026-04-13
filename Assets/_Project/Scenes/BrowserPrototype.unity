@@ -547,7 +547,7 @@ MonoBehaviour:
 
     WASD = Move
 
-    Shift = Sprint
+    Shift or double-tap W = Sprint
 
     Space = Jump
 
@@ -1671,7 +1671,7 @@ MonoBehaviour:
 
     WASD = Move
 
-    Shift = Sprint
+    Shift or double-tap W = Sprint
 
     Space
     = Jump
