@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4772468768a9b1e49b55b9f20cd8d6cc
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Roads/Road
+    4-Lane.prefab
+  uploadId: 858406

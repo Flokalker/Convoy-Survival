@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 138712c3d79f27c47b9a733ee8c0fcd8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Intersections/Intersection
+    Road Ground.prefab
+  uploadId: 858406

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ebc0dcf0c08a5fc46b4525a087b846e7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Editor/RoadLinkTool.cs
+  uploadId: 858406

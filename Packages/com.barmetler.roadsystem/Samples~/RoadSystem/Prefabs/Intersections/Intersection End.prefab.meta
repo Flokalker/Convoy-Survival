@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c59d778336a0d4f4fbf7f92086d9c551
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Intersections/Intersection
+    End.prefab
+  uploadId: 858406

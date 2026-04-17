@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f5a88dfc42d591448a58a4c760106f56
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Editor/Settings/RoadSystemSettings.cs
+  uploadId: 858406

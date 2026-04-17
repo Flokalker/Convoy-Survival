@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4158eae70d5fdb34ba14dac171ff50a5
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/CHANGELOG.md
+  uploadId: 858406

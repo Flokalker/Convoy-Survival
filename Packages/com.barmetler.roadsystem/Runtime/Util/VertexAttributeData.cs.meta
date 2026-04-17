@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: c9c5da7ba8ab47a3bdf230f84467afd8
+timeCreated: 1740320609
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Runtime/Util/VertexAttributeData.cs
+  uploadId: 858406

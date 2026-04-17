@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b5727b2519161644894c91b29cc1c130
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Complex/Round-a-Bout
+    r=30m 8-Way.prefab
+  uploadId: 858406

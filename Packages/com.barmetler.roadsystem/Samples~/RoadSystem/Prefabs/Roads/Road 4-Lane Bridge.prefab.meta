@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 041597e523e7aaf44ac392f49d57734e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Roads/Road
+    4-Lane Bridge.prefab
+  uploadId: 858406

@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 4feafe3a4ea14eb987ec80203da52f28
+timeCreated: 1732439741
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Runtime/Util/TwoDimensionalNativeArray.cs
+  uploadId: 858406

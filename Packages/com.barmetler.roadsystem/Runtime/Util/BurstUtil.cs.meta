@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 117608ce73fa4f16abb898f6efa51e64
+timeCreated: 1732445590
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Runtime/Util/BurstUtil.cs
+  uploadId: 858406

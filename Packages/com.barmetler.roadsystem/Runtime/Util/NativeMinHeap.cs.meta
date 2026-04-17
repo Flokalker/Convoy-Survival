@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: e7f998ff96f84f7fa14927736435a638
+timeCreated: 1732463212
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Runtime/Util/NativeMinHeap.cs
+  uploadId: 858406

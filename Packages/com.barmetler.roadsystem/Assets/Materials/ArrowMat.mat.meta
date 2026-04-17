@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fb6211d333b404c40b2bd199fc489c33
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Assets/Materials/ArrowMat.mat
+  uploadId: 858406

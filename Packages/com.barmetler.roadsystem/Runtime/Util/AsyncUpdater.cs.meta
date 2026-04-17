@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 598d561277ac98446994cf009fb513d6
+timeCreated: 1724259162
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Runtime/Util/AsyncUpdater.cs
+  uploadId: 858406

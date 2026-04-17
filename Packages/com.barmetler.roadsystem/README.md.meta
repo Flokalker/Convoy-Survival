@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fe92bb621f951bb4bbaa3133ee732153
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/README.md
+  uploadId: 858406

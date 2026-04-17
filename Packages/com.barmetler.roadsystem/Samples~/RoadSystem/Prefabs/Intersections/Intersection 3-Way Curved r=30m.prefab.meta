@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a4875ee1605f63c4fa930ffee0371b91
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Intersections/Intersection
+    3-Way Curved r=30m.prefab
+  uploadId: 858406

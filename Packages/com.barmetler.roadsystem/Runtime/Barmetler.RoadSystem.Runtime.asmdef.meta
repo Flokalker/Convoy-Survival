@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 13bb748a4cdc23745900902b3024379d
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Runtime/Barmetler.RoadSystem.Runtime.asmdef
+  uploadId: 858406

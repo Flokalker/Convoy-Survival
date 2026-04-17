@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: b67768d2caba4bd0a24e6fae8eebdeab
+timeCreated: 1724259525
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Editor/Settings/NewIntersectionWizard.cs
+  uploadId: 858406

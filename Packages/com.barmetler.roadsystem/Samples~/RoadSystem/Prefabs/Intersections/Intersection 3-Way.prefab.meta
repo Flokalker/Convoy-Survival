@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7fe8ce0f404eb5d4aa6478e4f16ee46f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Intersections/Intersection
+    3-Way.prefab
+  uploadId: 858406

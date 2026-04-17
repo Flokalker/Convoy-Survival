@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e31aa51d43842b245ba0583dc1fed1b7
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/LICENSE.md
+  uploadId: 858406

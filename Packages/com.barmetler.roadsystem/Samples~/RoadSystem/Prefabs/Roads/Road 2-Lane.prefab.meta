@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e29301b968a402d479a344fb4eafa3b4
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 192818
+  packageName: Road System
+  packageVersion: 2.2.1
+  assetPath: Packages/com.barmetler.roadsystem/Samples~/RoadSystem/Prefabs/Roads/Road
+    2-Lane.prefab
+  uploadId: 858406
