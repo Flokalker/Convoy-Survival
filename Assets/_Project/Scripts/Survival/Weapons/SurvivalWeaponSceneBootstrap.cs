@@ -357,36 +357,14 @@ public class SurvivalWeaponSceneBootstrap : MonoBehaviour
 
     private static void EnsureHud(SurvivalWeaponManager manager)
     {
-        Canvas canvas = FindAnyObjectByType<Canvas>();
-        if (canvas == null)
+        ApocalypseHudController apocalypseHud = FindAnyObjectByType<ApocalypseHudController>();
+        if (apocalypseHud == null)
         {
-            GameObject canvasObj = new GameObject("CombatHUD", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-            canvas = canvasObj.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            CanvasScaler scaler = canvasObj.GetComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            GameObject hudObject = new GameObject("ApocalypseHudController");
+            apocalypseHud = hudObject.AddComponent<ApocalypseHudController>();
         }
 
-        SurvivalWeaponHud hud = canvas.GetComponentInChildren<SurvivalWeaponHud>(true);
-        if (hud == null)
-        {
-            GameObject hudObj = new GameObject("WeaponHUD");
-            hudObj.transform.SetParent(canvas.transform, false);
-            hud = hudObj.AddComponent<SurvivalWeaponHud>();
-
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            if (font == null)
-            {
-                font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            }
-
-            Text weaponText = CreateHudText(hudObj.transform, "WeaponText", font, new Vector2(20f, -20f), new Vector2(420f, 40f));
-            Text ammoText = CreateHudText(hudObj.transform, "AmmoText", font, new Vector2(20f, -56f), new Vector2(260f, 36f));
-            Image crosshair = CreateCrosshair(hudObj.transform);
-            hud.ConfigureRuntime(manager, weaponText, ammoText, crosshair);
-        }
+        apocalypseHud.SetWeaponManager(manager);
     }
 
     private static Text CreateHudText(Transform parent, string name, Font font, Vector2 anchoredPos, Vector2 size)

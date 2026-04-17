@@ -217,8 +217,8 @@ public class ZombieSpawnSystem : MonoBehaviour
 
         Rigidbody rb = root.AddComponent<Rigidbody>();
         rb.mass = 65f;
-        rb.drag = 0.15f;
-        rb.angularDrag = 2f;
+        rb.linearDamping = 0.15f;
+        rb.angularDamping = 2f;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
