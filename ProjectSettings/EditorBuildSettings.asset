@@ -6,10 +6,30 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Scenes/PostApocRoadtrip.unity
+    guid: 3f0df69d0e0d4c64bbef21c3e5fc8d6c
   - enabled: 1
-    path: Assets/_Project/Scenes/BrowserPrototype.unity
-    guid: 226b4a1ae77b22644942294a6652a51b
-  m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    path: Assets/Scenes/Regions/BlackglassExpanse/Chunk_07_CrashFields.unity
+    guid: 73291a8584f7c4910b8b697162b34a08
+  - enabled: 1
+    path: Assets/Scenes/Regions/BlackglassExpanse/Chunk_08_FinalMile.unity
+    guid: 852c1b7cca71e459fa9bf48bf25dfb9b
+  - enabled: 1
+    path: Assets/Scenes/Regions/DustServiceCorridor/Chunk_03_MartLine.unity
+    guid: d8e9cfa9b483f43c489d29277978d88c
+  - enabled: 1
+    path: Assets/Scenes/Regions/DustServiceCorridor/Chunk_04_RestBasin.unity
+    guid: 87104215f3c044bf5a0aa5ec4d76e9ce
+  - enabled: 1
+    path: Assets/Scenes/Regions/RavineFrontier/Chunk_05_BridgeApproach.unity
+    guid: 276648596625b43889b6e26822d91a94
+  - enabled: 1
+    path: Assets/Scenes/Regions/RavineFrontier/Chunk_06_QuarantineBreach.unity
+    guid: bd2693833ff6348aea1c2d9478c0c95d
+  - enabled: 1
+    path: Assets/Scenes/Regions/RedMesaApproach/Chunk_01_SuburbGate.unity
+    guid: 6f4c6331aa06f4817833eada58e9e287
+  - enabled: 1
+    path: Assets/Scenes/Regions/RedMesaApproach/Chunk_02_ServiceEdge.unity
+    guid: 2020ca08b90634a03a3b95175676c2e9
+  m_configObjects: {}
