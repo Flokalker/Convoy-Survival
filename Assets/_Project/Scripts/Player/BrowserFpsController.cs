@@ -15,13 +15,25 @@ public class BrowserFpsController : MonoBehaviour
     [Header("Movement")]
     [SerializeField, Min(0.1f)] private float moveSpeed = 4.5f;
     [SerializeField, Min(0.1f)] private float sprintSpeed = 7f;
+    [SerializeField, Min(0.1f)] private float crouchSpeed = 2.25f;
+    [SerializeField] private bool allowDoubleTapSprint = true;
+    [SerializeField, Min(0.05f)] private float doubleTapSprintWindow = 0.4f;
     [SerializeField, Min(0.1f)] private float jumpHeight = 1.2f;
+    [SerializeField, Range(0f, 1f)] private float airControl = 0.45f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundedVerticalVelocity = -2f;
+    [SerializeField, Min(0f)] private float coyoteTime = 0.12f;
+    [SerializeField, Min(0f)] private float jumpBufferTime = 0.12f;
+    [SerializeField, Min(1f)] private float maxFallSpeed = 30f;
 
     [Header("Ground Check")]
     [SerializeField, Min(0.01f)] private float groundCheckRadius = 0.25f;
     [SerializeField] private LayerMask groundMask = ~0;
+
+    [Header("Crouch")]
+    [SerializeField, Min(0.5f)] private float crouchHeight = 1.2f;
+    [SerializeField, Min(0.1f)] private float crouchTransitionSpeed = 8f;
+    [SerializeField] private LayerMask crouchObstructionMask = ~0;
 
     [Header("Look")]
     [SerializeField, Min(0.01f)] private float mouseSensitivity = 0.15f;
@@ -41,7 +53,20 @@ public class BrowserFpsController : MonoBehaviour
     private Vector3 verticalVelocity;
     private float pitch;
     private bool isCursorLocked;
+    private bool jumpConsumed;
+    private bool doubleTapSprintActive;
+    private bool isCrouching;
+    private int forwardTapCount;
+    private float lastJumpPressedTime = float.NegativeInfinity;
+    private float lastGroundedTime = float.NegativeInfinity;
+    private float lastForwardTapTime = float.NegativeInfinity;
     private Vector3 initialSpawnPosition;
+    private float standingHeight;
+    private Vector3 standingCenter;
+    private float standingCameraLocalY;
+    private float crouchingCameraLocalY;
+    private readonly Collider[] groundCheckResults = new Collider[8];
+    private readonly Collider[] crouchCheckResults = new Collider[8];
 
     public event Action<bool> CursorLockStateChanged;
 
@@ -83,6 +108,12 @@ public class BrowserFpsController : MonoBehaviour
     private void Start()
     {
         initialSpawnPosition = transform.position;
+        standingHeight = characterController.height;
+        standingCenter = characterController.center;
+        standingCameraLocalY = cameraRoot != null ? cameraRoot.localPosition.y : standingCenter.y;
+        crouchHeight = Mathf.Min(crouchHeight, standingHeight);
+        float crouchRatio = crouchHeight / Mathf.Max(0.01f, standingHeight);
+        crouchingCameraLocalY = standingCameraLocalY * crouchRatio;
         pitch = NormalizePitch(cameraRoot.localEulerAngles.x);
         SetCursorLocked(lockCursorOnStart);
     }
@@ -98,6 +129,14 @@ public class BrowserFpsController : MonoBehaviour
     private void OnApplicationFocus(bool hasFocus)
     {
         if (!hasFocus && isCursorLocked)
+        {
+            SetCursorLocked(false);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (isCursorLocked)
         {
             SetCursorLocked(false);
         }
@@ -146,13 +185,22 @@ public class BrowserFpsController : MonoBehaviour
     {
         Keyboard keyboard = Keyboard.current;
         Vector2 moveInput = Vector2.zero;
+        bool isHoldingForward = false;
+        bool pressedForwardThisFrame = false;
+        bool wantsCrouch = false;
+        bool wantsSprintKey = false;
 
         if (keyboard != null)
         {
             if (keyboard.wKey.isPressed)
             {
                 moveInput.y += 1f;
+                isHoldingForward = true;
             }
+
+            pressedForwardThisFrame = keyboard.wKey.wasPressedThisFrame;
+            wantsSprintKey = keyboard.leftShiftKey.isPressed;
+            wantsCrouch = keyboard.leftCtrlKey.isPressed;
 
             if (keyboard.sKey.isPressed)
             {
@@ -175,31 +223,81 @@ public class BrowserFpsController : MonoBehaviour
             moveInput.Normalize();
         }
 
-        bool isGrounded = Physics.CheckSphere(
-            groundCheck.position,
-            groundCheckRadius,
-            groundMask,
-            QueryTriggerInteraction.Ignore);
+        UpdateCrouchState(wantsCrouch);
+
+        bool isGrounded = IsGrounded();
+        if (isGrounded)
+        {
+            lastGroundedTime = Time.time;
+        }
 
         if (isGrounded && verticalVelocity.y < 0f)
         {
             verticalVelocity.y = groundedVerticalVelocity;
         }
 
-        bool wantsSprint = keyboard != null && keyboard.leftShiftKey.isPressed;
-        float currentSpeed = wantsSprint ? sprintSpeed : moveSpeed;
-
-        Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
-        characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
-
-        bool wantsJump = keyboard != null && keyboard.spaceKey.wasPressedThisFrame;
-        if (isGrounded && wantsJump)
+        if (allowDoubleTapSprint && pressedForwardThisFrame)
         {
-            verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            forwardTapCount = Time.time <= lastForwardTapTime + doubleTapSprintWindow ? forwardTapCount + 1 : 1;
+            lastForwardTapTime = Time.time;
+
+            if (forwardTapCount >= 2)
+            {
+                doubleTapSprintActive = true;
+                forwardTapCount = 0;
+            }
         }
 
-        verticalVelocity.y += gravity * Time.deltaTime;
-        characterController.Move(verticalVelocity * Time.deltaTime);
+        if (!isHoldingForward || moveInput.y <= 0f)
+        {
+            doubleTapSprintActive = false;
+            if (!isHoldingForward)
+            {
+                forwardTapCount = 0;
+            }
+        }
+
+        bool wantsSprint = (wantsSprintKey || (allowDoubleTapSprint && doubleTapSprintActive)) && moveInput.y > 0f && !isCrouching;
+        float currentSpeed = isCrouching ? crouchSpeed : wantsSprint ? sprintSpeed : moveSpeed;
+        float movementControl = isGrounded ? 1f : airControl;
+
+        Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
+        Vector3 horizontalVelocity = moveDirection * (currentSpeed * movementControl);
+
+        bool jumpHeld = keyboard != null && keyboard.spaceKey.isPressed;
+        if (isGrounded && !jumpHeld)
+        {
+            jumpConsumed = false;
+        }
+
+        bool wantsJump = keyboard != null && keyboard.spaceKey.wasPressedThisFrame;
+        if (wantsJump)
+        {
+            lastJumpPressedTime = Time.time;
+        }
+
+        bool canUseBufferedJump = Time.time <= lastJumpPressedTime + jumpBufferTime;
+        bool canUseCoyoteJump = isGrounded || Time.time <= lastGroundedTime + coyoteTime;
+        if (!jumpConsumed && canUseBufferedJump && canUseCoyoteJump)
+        {
+            verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            jumpConsumed = true;
+            lastJumpPressedTime = float.NegativeInfinity;
+            isGrounded = false;
+        }
+
+        verticalVelocity.y = Mathf.Max(verticalVelocity.y + gravity * Time.deltaTime, -maxFallSpeed);
+
+        CollisionFlags collisionFlags = characterController.Move((horizontalVelocity + verticalVelocity) * Time.deltaTime);
+        if ((collisionFlags & CollisionFlags.Above) != 0 && verticalVelocity.y > 0f)
+        {
+            verticalVelocity.y = 0f;
+        }
+
+        if ((collisionFlags & CollisionFlags.Below) != 0 && verticalVelocity.y < 0f)
+        {
+            verticalVelocity.y = groundedVerticalVelocity;
+        }
     }
 
     private void HandleRespawn()
@@ -231,6 +329,14 @@ public class BrowserFpsController : MonoBehaviour
         }
 
         verticalVelocity = Vector3.zero;
+        jumpConsumed = false;
+        doubleTapSprintActive = false;
+        isCrouching = false;
+        forwardTapCount = 0;
+        lastJumpPressedTime = float.NegativeInfinity;
+        lastGroundedTime = Time.time;
+        lastForwardTapTime = float.NegativeInfinity;
+        ApplyCharacterHeight(standingHeight);
     }
 
     public void SetCursorLocked(bool locked)
@@ -282,5 +388,98 @@ public class BrowserFpsController : MonoBehaviour
         }
 
         return rawPitch;
+    }
+
+    private void UpdateCrouchState(bool wantsCrouch)
+    {
+        if (wantsCrouch)
+        {
+            isCrouching = true;
+            doubleTapSprintActive = false;
+        }
+        else if (isCrouching && CanStandUp())
+        {
+            isCrouching = false;
+        }
+
+        float targetHeight = isCrouching ? crouchHeight : standingHeight;
+        ApplyCharacterHeight(targetHeight);
+    }
+
+    private void ApplyCharacterHeight(float targetHeight)
+    {
+        float newHeight = Mathf.MoveTowards(characterController.height, targetHeight, crouchTransitionSpeed * Time.deltaTime);
+        characterController.height = newHeight;
+        characterController.center = new Vector3(standingCenter.x, newHeight * 0.5f, standingCenter.z);
+
+        if (cameraRoot != null)
+        {
+            Vector3 localPosition = cameraRoot.localPosition;
+            float targetCameraY = isCrouching ? crouchingCameraLocalY : standingCameraLocalY;
+            localPosition.y = Mathf.MoveTowards(localPosition.y, targetCameraY, crouchTransitionSpeed * Time.deltaTime);
+            cameraRoot.localPosition = localPosition;
+        }
+    }
+
+    private bool CanStandUp()
+    {
+        float radius = characterController.radius * 0.95f;
+        Vector3 worldCenter = transform.TransformPoint(standingCenter);
+        Vector3 bottom = worldCenter + Vector3.down * ((standingHeight * 0.5f) - radius);
+        Vector3 top = worldCenter + Vector3.up * ((standingHeight * 0.5f) - radius);
+
+        int hitCount = Physics.OverlapCapsuleNonAlloc(
+            bottom,
+            top,
+            radius,
+            crouchCheckResults,
+            crouchObstructionMask,
+            QueryTriggerInteraction.Ignore);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider hitCollider = crouchCheckResults[i];
+            if (hitCollider == null)
+            {
+                continue;
+            }
+
+            if (hitCollider.transform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool IsGrounded()
+    {
+        int hitCount = Physics.OverlapSphereNonAlloc(
+            groundCheck.position,
+            groundCheckRadius,
+            groundCheckResults,
+            groundMask,
+            QueryTriggerInteraction.Ignore);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider hitCollider = groundCheckResults[i];
+            if (hitCollider == null)
+            {
+                continue;
+            }
+
+            if (hitCollider.transform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

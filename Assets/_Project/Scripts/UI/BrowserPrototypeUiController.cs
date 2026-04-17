@@ -18,6 +18,8 @@ public class BrowserPrototypeUiController : MonoBehaviour
         "Browser Prototype\n\n" +
         "WASD = Move\n" +
         "Shift = Sprint\n" +
+        "Left Ctrl = Crouch\n" +
+        "Double-tap W = Sprint\n" +
         "Space = Jump\n" +
         "Left Click = Lock Cursor\n" +
         "Escape = Release Cursor\n\n" +

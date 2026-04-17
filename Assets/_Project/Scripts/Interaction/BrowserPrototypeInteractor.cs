@@ -10,8 +10,10 @@ public class BrowserPrototypeInteractor : MonoBehaviour
     [SerializeField, Min(0.5f)] private float interactionDistance = 2.75f;
     [SerializeField, Min(0.01f)] private float interactionRadius = 0.35f;
     [SerializeField] private LayerMask interactionMask = ~0;
+    [SerializeField] private LayerMask obstructionMask = ~0;
     [SerializeField] private Key interactionKey = Key.E;
     [SerializeField] private bool requireCursorLock = true;
+    [SerializeField] private bool requireLineOfSight = true;
     [SerializeField, Range(-1f, 1f)] private float minViewDot = 0.2f;
 
     private readonly Collider[] overlapResults = new Collider[32];
@@ -99,6 +101,11 @@ public class BrowserPrototypeInteractor : MonoBehaviour
                 continue;
             }
 
+            if (requireLineOfSight && IsBlockedByObstacle(originPosition, hitCollider, interactable))
+            {
+                continue;
+            }
+
             float score = distance + (1f - normalizedDot);
             if (score < bestScore)
             {
@@ -150,6 +157,37 @@ public class BrowserPrototypeInteractor : MonoBehaviour
 
         currentTarget = nextTarget;
         TargetChanged?.Invoke(currentTarget);
+    }
+
+    private bool IsBlockedByObstacle(Vector3 originPosition, Collider targetCollider, BrowserPrototypeInteractable interactable)
+    {
+        if (targetCollider == null || interactable == null)
+        {
+            return false;
+        }
+
+        Vector3 targetPoint = targetCollider.ClosestPoint(originPosition);
+        Vector3 rayDirection = targetPoint - originPosition;
+        float rayDistance = rayDirection.magnitude;
+
+        if (rayDistance <= 0.001f)
+        {
+            return false;
+        }
+
+        if (!Physics.Raycast(
+            originPosition,
+            rayDirection / rayDistance,
+            out RaycastHit hit,
+            rayDistance,
+            obstructionMask,
+            QueryTriggerInteraction.Ignore))
+        {
+            return false;
+        }
+
+        return !hit.transform.IsChildOf(interactable.transform)
+            && !interactable.transform.IsChildOf(hit.transform);
     }
 
     private void OnDrawGizmosSelected()

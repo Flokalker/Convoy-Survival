@@ -9,7 +9,7 @@ public class BrowserPrototypeRuntimeSettings : MonoBehaviour
     [Header("Performance Defaults")]
     [SerializeField] private int targetFrameRate = 60;
     [SerializeField] private int vSyncCount = 0;
-    [SerializeField, Min(0f)] private float shadowDistance = 30f;
+    [SerializeField, Min(0f)] private float shadowDistance = 24f;
     [SerializeField] private bool disableRealtimeReflectionProbes = true;
 
     private void Awake()
