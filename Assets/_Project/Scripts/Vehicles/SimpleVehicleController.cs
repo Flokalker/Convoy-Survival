@@ -850,13 +850,24 @@ public class SimpleVehicleController : MonoBehaviour
 
     private static GameObject FindNamedPlayer()
     {
-        GameObject namedPlayer = GameObject.Find("Player");
-        if (namedPlayer != null)
+        string[] candidateNames =
         {
-            return namedPlayer;
+            "Player",
+            "PlayerController",
+            "FPSController",
+            "Character"
+        };
+
+        foreach (string candidateName in candidateNames)
+        {
+            GameObject namedPlayer = GameObject.Find(candidateName);
+            if (namedPlayer != null)
+            {
+                return namedPlayer;
+            }
         }
 
-        return GameObject.Find("TestPlayer");
+        return null;
     }
 
     private static bool HasPlayerTag(Component component)
@@ -879,7 +890,9 @@ public class SimpleVehicleController : MonoBehaviour
     private static bool HasSupportedPlayerName(string candidateName)
     {
         return string.Equals(candidateName, "Player", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(candidateName, "TestPlayer", StringComparison.OrdinalIgnoreCase);
+            || string.Equals(candidateName, "PlayerController", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(candidateName, "FPSController", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(candidateName, "Character", StringComparison.OrdinalIgnoreCase);
     }
 
     private float ReadThrottleInput()
