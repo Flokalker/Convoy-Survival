@@ -104,6 +104,7 @@ public class ZombieAI : MonoBehaviour
     private float verticalVelocity;
     private Collider bodyCollider;
     private Rigidbody rb;
+    private float externalSpeedMultiplier = 1f;
 
     public ZombieState CurrentState => currentState;
     public ZombieVariant Variant => variant;
@@ -414,10 +415,20 @@ public class ZombieAI : MonoBehaviour
     private void ApplyVariantStats()
     {
         activeStats = GetVariantStats(variant);
-        agent.speed = activeStats.moveSpeed;
+        agent.speed = activeStats.moveSpeed * Mathf.Max(0.1f, externalSpeedMultiplier);
         agent.stoppingDistance = activeStats.stoppingDistance;
-        nonNavmeshMoveSpeed = activeStats.moveSpeed;
+        nonNavmeshMoveSpeed = activeStats.moveSpeed * Mathf.Max(0.1f, externalSpeedMultiplier);
         health.SetMaxHealth(activeStats.maxHealth, true);
+    }
+
+    public void SetExternalSpeedMultiplier(float multiplier)
+    {
+        externalSpeedMultiplier = Mathf.Max(0.1f, multiplier);
+        if (activeStats != null)
+        {
+            agent.speed = activeStats.moveSpeed * externalSpeedMultiplier;
+            nonNavmeshMoveSpeed = activeStats.moveSpeed * externalSpeedMultiplier;
+        }
     }
 
     public void ConfigureRuntimeVariant(ZombieVariant runtimeVariant, GameObject projectilePrefab = null, Transform projectileOrigin = null)

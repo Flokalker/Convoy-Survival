@@ -114,6 +114,10 @@ public class CombatAIManager : MonoBehaviour
             }
 
             ZombieAI zombie = Instantiate(prefab, point.position, point.rotation);
+            if (zombie != null && !zombie.gameObject.activeSelf)
+            {
+                zombie.gameObject.SetActive(true);
+            }
             RegisterZombie(zombie);
             yield return new WaitForSeconds(spawnInterval);
         }
@@ -130,6 +134,10 @@ public class CombatAIManager : MonoBehaviour
             }
 
             ZombieAI zombie = Instantiate(prefab, point.position, point.rotation);
+            if (zombie != null && !zombie.gameObject.activeSelf)
+            {
+                zombie.gameObject.SetActive(true);
+            }
             RegisterZombie(zombie);
             yield return new WaitForSeconds(spawnInterval);
         }
