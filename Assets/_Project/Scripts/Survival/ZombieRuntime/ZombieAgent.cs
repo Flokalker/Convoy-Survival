@@ -19,11 +19,11 @@ public class ZombieAgent : MonoBehaviour, IDamageable
     [SerializeField] private float maxHealth = 75f;
     [SerializeField] private float currentHealth = 75f;
     [SerializeField] private float detectionRange = 20f;
-    [SerializeField] private float attackRange = 1.6f;
+    [SerializeField] private float attackRange = 2.1f;
     [SerializeField] private float attackCooldown = 1.1f;
     [SerializeField] private float attackDamage = 11f;
-    [SerializeField] private float attackHitRadius = 1.1f;
-    [SerializeField] private float attackReachForward = 0.9f;
+    [SerializeField] private float attackHitRadius = 1.45f;
+    [SerializeField] private float attackReachForward = 1.15f;
     [SerializeField] private LayerMask playerHitMask = ~0;
     [SerializeField] private float wanderRadius = 10f;
     [SerializeField] private float wanderInterval = 3.2f;
@@ -37,6 +37,7 @@ public class ZombieAgent : MonoBehaviour, IDamageable
     private Transform playerTarget;
     private NavMeshAgent agent;
     private ZombieAnimationMachine animationMachine;
+    private PlayerStats forcedPlayerStats;
     private float nextAttackTime;
     private float nextWanderTime;
     private Vector3 spawnOrigin;
@@ -57,9 +58,11 @@ public class ZombieAgent : MonoBehaviour, IDamageable
         float wanderRad,
         float wanderDelay,
         float despawnDist,
+        PlayerStats forcedStats,
         bool logs)
     {
         playerTarget = target;
+        forcedPlayerStats = forcedStats;
         animationMachine = animation;
         maxHealth = Mathf.Max(1f, healthValue);
         currentHealth = maxHealth;
@@ -268,9 +271,13 @@ public class ZombieAgent : MonoBehaviour, IDamageable
             return;
         }
 
-        PlayerStats stats = playerTarget != null
+        PlayerStats stats = forcedPlayerStats;
+        if (stats == null)
+        {
+            stats = playerTarget != null
             ? (playerTarget.GetComponentInParent<PlayerStats>() ?? playerTarget.GetComponentInChildren<PlayerStats>())
             : null;
+        }
 
         if (stats == null)
         {
@@ -282,8 +289,12 @@ public class ZombieAgent : MonoBehaviour, IDamageable
             stats.TakeDamage(attackDamage, gameObject);
             if (debugLogs)
             {
-                Debug.Log($"ZombieAgent: {name} hit player for {attackDamage:0.0} damage.");
+                Debug.Log($"ZombieAgent: {name} hit player for {attackDamage:0.0} damage. HP now {stats.CurrentHealth:0.0}/{stats.MaxHealth:0.0}");
             }
+        }
+        else if (debugLogs)
+        {
+            Debug.LogWarning($"ZombieAgent: {name} attack had no valid PlayerStats target.");
         }
     }
 

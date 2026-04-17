@@ -53,6 +53,7 @@ public class ZombieSpawnSystem : MonoBehaviour
     private readonly List<ZombieVisualTemplate> loadedTemplates = new List<ZombieVisualTemplate>();
 
     private Transform playerTarget;
+    private PlayerStats playerStatsTarget;
     private Coroutine loopRoutine;
     private bool navMeshAvailable;
 
@@ -82,6 +83,12 @@ public class ZombieSpawnSystem : MonoBehaviour
 
             enabled = false;
             return;
+        }
+
+        playerStatsTarget = EnsurePlayerStatsTarget(playerTarget);
+        if (playerStatsTarget != null)
+        {
+            playerStatsTarget.SetInfiniteHealth(false);
         }
 
         LoadZombieTemplates();
@@ -210,8 +217,8 @@ public class ZombieSpawnSystem : MonoBehaviour
 
         Rigidbody rb = root.AddComponent<Rigidbody>();
         rb.mass = 65f;
-        rb.linearDamping = 0.15f;
-        rb.angularDamping = 2f;
+        rb.drag = 0.15f;
+        rb.angularDrag = 2f;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
@@ -266,6 +273,7 @@ public class ZombieSpawnSystem : MonoBehaviour
             wanderRadius,
             wanderInterval,
             despawnDistance,
+            playerStatsTarget,
             debugLogs);
 
         return zombie;
@@ -413,6 +421,32 @@ public class ZombieSpawnSystem : MonoBehaviour
 
         GameObject named = GameObject.Find("Player");
         return named != null ? named.transform : null;
+    }
+
+    private static PlayerStats EnsurePlayerStatsTarget(Transform target)
+    {
+        if (target == null)
+        {
+            return FindAnyObjectByType<PlayerStats>();
+        }
+
+        PlayerStats found = target.GetComponentInParent<PlayerStats>();
+        if (found == null)
+        {
+            found = target.GetComponentInChildren<PlayerStats>();
+        }
+
+        if (found == null)
+        {
+            Transform root = target.root != null ? target.root : target;
+            found = root.GetComponent<PlayerStats>();
+            if (found == null)
+            {
+                found = root.gameObject.AddComponent<PlayerStats>();
+            }
+        }
+
+        return found;
     }
 
     private void LoadZombieTemplates()
