@@ -72,3 +72,6 @@ crashlytics-build.properties
 
 # Python cache
 __pycache__/
+
+# macOS
+.DS_Store
