@@ -7,8 +7,10 @@ public static class FirstPersonSceneBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void EnsureFirstPersonController()
     {
-        if (Object.FindFirstObjectByType<BrowserFpsController>() != null)
+        BrowserFpsController existingController = Object.FindFirstObjectByType<BrowserFpsController>();
+        if (existingController != null)
         {
+            EnsureCarInteraction(existingController.gameObject);
             return;
         }
 
@@ -68,5 +70,14 @@ public static class FirstPersonSceneBootstrap
 
         BrowserFpsController controller = player.AddComponent<BrowserFpsController>();
         controller.ConfigureReferences(cameraRoot, groundCheck, null);
+        EnsureCarInteraction(player);
+    }
+
+    private static void EnsureCarInteraction(GameObject playerObject)
+    {
+        if (playerObject.GetComponent<PlayerInteract>() == null)
+        {
+            playerObject.AddComponent<PlayerInteract>();
+        }
     }
 }
