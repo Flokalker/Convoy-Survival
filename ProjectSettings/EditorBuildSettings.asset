@@ -11,5 +11,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/BrowserPrototype.unity
     guid: 226b4a1ae77b22644942294a6652a51b
+  - enabled: 1
+    path: Assets/_Project/Scenes/Hub.unity
+    guid: 39fc18c78e7bf3d47ae7ddbf741adfa6
+  - enabled: 1
+    path: Assets/_Project/Scenes/MainRun.unity
+    guid: 1311937761171784aa4d1a102448c31f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

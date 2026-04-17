@@ -1,0 +1,192 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 731a1dc32c98bfd4aa3dbb87c533a57e, type: 3}
+  m_Name: TruckUpgradeCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ConvoySurvival.Data.TruckUpgradeCatalog
+  paths:
+  - specialization: 0
+    displayName: Tank
+    keyFeature: Heavy armor, spiked bumper, and plow for ramming.
+    weakness: Slow and fuel hungry
+    tiers:
+    - TierName: Tank I
+      ScrapCost: 0
+      MaxDurability: 180
+      MaxFuel: 120
+      ForwardSpeed: 20
+      LaneChangeSpeed: 6.2
+      FuelDrainPerSecond: 1.55
+      CollisionDamageMultiplier: 0.72
+      ZombieKillSpeed: 10
+      NitroSpeedMultiplier: 1
+      NitroFuelDrainMultiplier: 1
+      SteeringFactor: 0.9
+      TruckScale: 1.05
+      HasSpikes: 1
+      HasPlow: 0
+      HasTurret: 0
+      HasNitro: 0
+      ExtraTurretDamagePerSecond: 0
+    - TierName: Tank II
+      ScrapCost: 100
+      MaxDurability: 230
+      MaxFuel: 140
+      ForwardSpeed: 21
+      LaneChangeSpeed: 6
+      FuelDrainPerSecond: 1.75
+      CollisionDamageMultiplier: 0.6
+      ZombieKillSpeed: 9
+      NitroSpeedMultiplier: 1
+      NitroFuelDrainMultiplier: 1
+      SteeringFactor: 0.85
+      TruckScale: 1.1
+      HasSpikes: 1
+      HasPlow: 1
+      HasTurret: 0
+      HasNitro: 0
+      ExtraTurretDamagePerSecond: 0
+    - TierName: Tank III
+      ScrapCost: 180
+      MaxDurability: 290
+      MaxFuel: 160
+      ForwardSpeed: 22
+      LaneChangeSpeed: 5.8
+      FuelDrainPerSecond: 1.95
+      CollisionDamageMultiplier: 0.48
+      ZombieKillSpeed: 8
+      NitroSpeedMultiplier: 1
+      NitroFuelDrainMultiplier: 1
+      SteeringFactor: 0.8
+      TruckScale: 1.14
+      HasSpikes: 1
+      HasPlow: 1
+      HasTurret: 0
+      HasNitro: 0
+      ExtraTurretDamagePerSecond: 0
+  - specialization: 1
+    displayName: Scout
+    keyFeature: Nitro boost, off-road tires, and solar roof.
+    weakness: Fast but fragile
+    tiers:
+    - TierName: Scout I
+      ScrapCost: 0
+      MaxDurability: 90
+      MaxFuel: 95
+      ForwardSpeed: 27
+      LaneChangeSpeed: 10.5
+      FuelDrainPerSecond: 0.95
+      CollisionDamageMultiplier: 1.28
+      ZombieKillSpeed: 17
+      NitroSpeedMultiplier: 1.55
+      NitroFuelDrainMultiplier: 2.35
+      SteeringFactor: 1.2
+      TruckScale: 0.95
+      HasSpikes: 0
+      HasPlow: 0
+      HasTurret: 0
+      HasNitro: 1
+      ExtraTurretDamagePerSecond: 0
+    - TierName: Scout II
+      ScrapCost: 90
+      MaxDurability: 105
+      MaxFuel: 110
+      ForwardSpeed: 29
+      LaneChangeSpeed: 11.5
+      FuelDrainPerSecond: 0.82
+      CollisionDamageMultiplier: 1.2
+      ZombieKillSpeed: 16
+      NitroSpeedMultiplier: 1.6
+      NitroFuelDrainMultiplier: 2.2
+      SteeringFactor: 1.25
+      TruckScale: 0.95
+      HasSpikes: 0
+      HasPlow: 0
+      HasTurret: 0
+      HasNitro: 1
+      ExtraTurretDamagePerSecond: 0
+    - TierName: Scout III
+      ScrapCost: 160
+      MaxDurability: 120
+      MaxFuel: 130
+      ForwardSpeed: 31
+      LaneChangeSpeed: 12.5
+      FuelDrainPerSecond: 0.72
+      CollisionDamageMultiplier: 1.14
+      ZombieKillSpeed: 15
+      NitroSpeedMultiplier: 1.68
+      NitroFuelDrainMultiplier: 2.1
+      SteeringFactor: 1.3
+      TruckScale: 0.94
+      HasSpikes: 0
+      HasPlow: 0
+      HasTurret: 0
+      HasNitro: 1
+      ExtraTurretDamagePerSecond: 0
+  - specialization: 2
+    displayName: Fortress
+    keyFeature: Roof turrets, reinforced windows, and extra seats.
+    weakness: Large target and hard steering
+    tiers:
+    - TierName: Fortress I
+      ScrapCost: 0
+      MaxDurability: 160
+      MaxFuel: 120
+      ForwardSpeed: 23
+      LaneChangeSpeed: 6.4
+      FuelDrainPerSecond: 1.2
+      CollisionDamageMultiplier: 1.04
+      ZombieKillSpeed: 12
+      NitroSpeedMultiplier: 1
+      NitroFuelDrainMultiplier: 1
+      SteeringFactor: 0.8
+      TruckScale: 1.12
+      HasSpikes: 0
+      HasPlow: 0
+      HasTurret: 1
+      HasNitro: 0
+      ExtraTurretDamagePerSecond: 14
+    - TierName: Fortress II
+      ScrapCost: 110
+      MaxDurability: 210
+      MaxFuel: 140
+      ForwardSpeed: 24
+      LaneChangeSpeed: 6
+      FuelDrainPerSecond: 1.3
+      CollisionDamageMultiplier: 1.1
+      ZombieKillSpeed: 11
+      NitroSpeedMultiplier: 1
+      NitroFuelDrainMultiplier: 1
+      SteeringFactor: 0.75
+      TruckScale: 1.16
+      HasSpikes: 0
+      HasPlow: 0
+      HasTurret: 1
+      HasNitro: 0
+      ExtraTurretDamagePerSecond: 20
+    - TierName: Fortress III
+      ScrapCost: 190
+      MaxDurability: 260
+      MaxFuel: 165
+      ForwardSpeed: 25
+      LaneChangeSpeed: 5.7
+      FuelDrainPerSecond: 1.42
+      CollisionDamageMultiplier: 1.18
+      ZombieKillSpeed: 10
+      NitroSpeedMultiplier: 1
+      NitroFuelDrainMultiplier: 1
+      SteeringFactor: 0.7
+      TruckScale: 1.2
+      HasSpikes: 0
+      HasPlow: 0
+      HasTurret: 1
+      HasNitro: 0
+      ExtraTurretDamagePerSecond: 26

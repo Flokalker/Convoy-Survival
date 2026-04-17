@@ -25,6 +25,7 @@ public class BrowserPrototypeUiController : MonoBehaviour
 
     [Header("Behaviour")]
     [SerializeField] private bool hideOverlayOnFirstCursorLock = true;
+    [SerializeField] private bool disableStartOverlay = true;
 
     private bool overlayDismissed;
 
@@ -89,7 +90,16 @@ public class BrowserPrototypeUiController : MonoBehaviour
 
     private void Start()
     {
-        SetOverlayVisible(!overlayDismissed);
+        if (disableStartOverlay)
+        {
+            overlayDismissed = true;
+            SetOverlayVisible(false);
+        }
+        else
+        {
+            SetOverlayVisible(!overlayDismissed);
+        }
+
         RefreshInteractionPrompt();
         RefreshCollectedCounter();
 
