@@ -43,6 +43,33 @@ public static class ConvoyPrototypeBootstrapper
         Material gateMat = CreateOrUpdateMaterial(MaterialsPath + "/M_Gate.mat", new Color(0.39f, 0.29f, 0.21f));
         Material propMat = CreateOrUpdateMaterial(MaterialsPath + "/M_TradingProp.mat", new Color(0.68f, 0.66f, 0.56f));
         Material hubGroundMat = CreateOrUpdateMaterial(MaterialsPath + "/M_HubGround.mat", new Color(0.32f, 0.37f, 0.33f));
+        Material hubConcreteMat = CreateOrUpdateMaterial(MaterialsPath + "/M_HubConcrete.mat", new Color(0.46f, 0.47f, 0.49f));
+        Material hubAccentMat = CreateOrUpdateMaterial(MaterialsPath + "/M_HubAccent.mat", new Color(0.95f, 0.57f, 0.23f));
+        Material shopWallMat = CreateOrUpdateMaterial(MaterialsPath + "/M_ShopWall.mat", new Color(0.29f, 0.34f, 0.39f));
+        Material shopAwningMat = CreateOrUpdateMaterial(MaterialsPath + "/M_ShopAwning.mat", new Color(0.73f, 0.16f, 0.11f));
+        Material neonMat = CreateOrUpdateMaterial(MaterialsPath + "/M_Neon.mat", new Color(0.2f, 0.85f, 0.78f));
+        Texture2D hubPavementTex = CreateOrUpdateCheckerTexture(
+            MaterialsPath + "/T_HubPavement.asset",
+            new Color(0.31f, 0.35f, 0.36f),
+            new Color(0.27f, 0.3f, 0.31f),
+            64,
+            8);
+        Texture2D shopMetalTex = CreateOrUpdateStripedTexture(
+            MaterialsPath + "/T_ShopMetal.asset",
+            new Color(0.33f, 0.39f, 0.45f),
+            new Color(0.24f, 0.28f, 0.32f),
+            64,
+            6);
+        Texture2D awningTex = CreateOrUpdateStripedTexture(
+            MaterialsPath + "/T_Awning.asset",
+            new Color(0.72f, 0.15f, 0.1f),
+            new Color(0.86f, 0.81f, 0.73f),
+            64,
+            10);
+        ApplyTextureToMaterial(hubGroundMat, hubPavementTex, new Vector2(8f, 8f));
+        ApplyTextureToMaterial(hubConcreteMat, hubPavementTex, new Vector2(6f, 6f));
+        ApplyTextureToMaterial(shopWallMat, shopMetalTex, new Vector2(5f, 3f));
+        ApplyTextureToMaterial(shopAwningMat, awningTex, new Vector2(3f, 2f));
 
         TruckUpgradeCatalog catalog = CreateOrUpdateUpgradeCatalog(DataPath + "/TruckUpgradeCatalog.asset");
 
@@ -55,7 +82,7 @@ public static class ConvoyPrototypeBootstrapper
         GameObject tradingPropPrefab = CreateTradingPropPrefab(PrefabsPath + "/PF_TradingProp.prefab", propMat);
         GameObject waypointPrefab = CreateWaypointPrefab(PrefabsPath + "/PF_Waypoint.prefab", pickupMat);
 
-        CreateHubScene(catalog, hubGroundMat, truckPrefab);
+        CreateHubScene(catalog, hubGroundMat, hubConcreteMat, hubAccentMat, shopWallMat, shopAwningMat, neonMat, truckPrefab);
         CreateMainRunScene(catalog, truckPrefab, roadPrefab, zombiePrefab, pickupPrefab, hazardPrefab, gatePrefab, tradingPropPrefab, waypointPrefab);
 
         AddScenesToBuildSettings(HubScenePath, MainRunScenePath);
@@ -67,15 +94,24 @@ public static class ConvoyPrototypeBootstrapper
         Debug.Log("Convoy prototype bootstrap complete. Open Hub scene and press Play.");
     }
 
-    private static void CreateHubScene(TruckUpgradeCatalog catalog, Material hubGroundMat, GameObject truckPrefab)
+    private static void CreateHubScene(
+        TruckUpgradeCatalog catalog,
+        Material hubGroundMat,
+        Material hubConcreteMat,
+        Material hubAccentMat,
+        Material shopWallMat,
+        Material shopAwningMat,
+        Material neonMat,
+        GameObject truckPrefab)
     {
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-        SetupEnvironment(new Color(0.62f, 0.69f, 0.75f), new Color(0.58f, 0.64f, 0.68f), true);
+        SetupEnvironment(new Color(0.63f, 0.7f, 0.77f), new Color(0.57f, 0.63f, 0.69f), true);
 
         CreateSessionStateObject(catalog);
         CreateGround("HubGround", new Vector3(0f, -0.5f, 0f), new Vector3(90f, 1f, 90f), hubGroundMat, null);
 
-        CreatePerimeterWalls(hubGroundMat);
+        CreatePerimeterWalls(hubConcreteMat);
+        CreateHubVisualDistrict(hubConcreteMat, hubAccentMat, shopWallMat, shopAwningMat, neonMat);
 
         GameObject parkedTruck = (GameObject)PrefabUtility.InstantiatePrefab(truckPrefab);
         parkedTruck.name = "ParkedTruck";
@@ -102,10 +138,10 @@ public static class ConvoyPrototypeBootstrapper
         HubInteractionController interactionController;
         CreateHubPlayer(new Vector3(0f, 1.2f, -10f), out interactionController);
 
-        CreateTruckEntryInteractable(new Vector3(0f, 1f, 4f));
-        CreateCustomizationStation(TruckSpecialization.Tank, new Vector3(-9f, 1f, -1f));
-        CreateCustomizationStation(TruckSpecialization.Scout, new Vector3(0f, 1f, -4f));
-        CreateCustomizationStation(TruckSpecialization.Fortress, new Vector3(9f, 1f, -1f));
+        CreateTruckEntryInteractable(new Vector3(0f, 1f, 4f), hubConcreteMat, hubAccentMat);
+        CreateCustomizationStation(TruckSpecialization.Tank, new Vector3(-18f, 1f, 7f), hubConcreteMat, neonMat);
+        CreateCustomizationStation(TruckSpecialization.Scout, new Vector3(0f, 1f, 18f), hubConcreteMat, neonMat);
+        CreateCustomizationStation(TruckSpecialization.Fortress, new Vector3(18f, 1f, 7f), hubConcreteMat, neonMat);
 
         CreateHubHud(interactionController);
 
@@ -202,22 +238,110 @@ public static class ConvoyPrototypeBootstrapper
         interactionController.Configure(cameraObject.transform);
     }
 
-    private static void CreateTruckEntryInteractable(Vector3 position)
+    private static void CreateTruckEntryInteractable(Vector3 position, Material baseMaterial, Material accentMaterial)
     {
-        GameObject pedestal = CreateGround("TruckEntry", position, new Vector3(2.4f, 2f, 2.4f), null, null);
+        GameObject pedestal = CreateGround("TruckEntry", position, new Vector3(2.8f, 2f, 2.8f), baseMaterial, null);
+        CreateGround("EntryHighlight", position + new Vector3(0f, 0.81f, 0f), new Vector3(2.2f, 0.05f, 2.2f), accentMaterial, null);
         HubTruckEntryPoint entryPoint = pedestal.AddComponent<HubTruckEntryPoint>();
         entryPoint.Configure("MainRun");
 
-        CreateLabel("Start Run", pedestal.transform, new Vector3(0f, 1.6f, -1f));
+        CreateLabel("START RUN", pedestal.transform, new Vector3(0f, 1.8f, -1.1f), 180f, new Color(0.98f, 0.94f, 0.8f), 64, 0.075f);
     }
 
-    private static void CreateCustomizationStation(TruckSpecialization specialization, Vector3 position)
+    private static void CreateCustomizationStation(TruckSpecialization specialization, Vector3 position, Material baseMaterial, Material accentMaterial)
     {
-        GameObject station = CreateGround(specialization + "Station", position, new Vector3(2.5f, 2f, 2.5f), null, null);
+        GameObject station = CreateGround(specialization + "Station", position, new Vector3(2.8f, 2f, 2.8f), baseMaterial, null);
+        CreateGround("StationAccent", position + new Vector3(0f, 0.81f, 0f), new Vector3(2.2f, 0.05f, 2.2f), accentMaterial, null);
         HubCustomizationStation customization = station.AddComponent<HubCustomizationStation>();
         customization.Configure(specialization, true);
 
-        CreateLabel(specialization + "\nStation", station.transform, new Vector3(0f, 1.6f, -1f));
+        CreateLabel(specialization + "\nStation", station.transform, new Vector3(0f, 1.85f, -1.1f), 180f, new Color(0.91f, 0.95f, 0.99f), 54, 0.072f);
+    }
+
+    private static void CreateHubVisualDistrict(
+        Material concreteMat,
+        Material accentMat,
+        Material shopWallMat,
+        Material shopAwningMat,
+        Material neonMat)
+    {
+        GameObject root = new GameObject("HubDistrict");
+        Transform district = root.transform;
+
+        CreateGround("MainPlaza", new Vector3(0f, -0.35f, 2f), new Vector3(42f, 0.3f, 44f), concreteMat, district);
+        CreateGround("CenterRoad", new Vector3(0f, -0.28f, 2f), new Vector3(10f, 0.08f, 48f), shopWallMat, district);
+
+        for (int i = 0; i < 8; i++)
+        {
+            float z = -24f + i * 6.8f;
+            CreateGround("RoadStripe_" + i, new Vector3(0f, -0.21f, z), new Vector3(0.28f, 0.02f, 2.8f), accentMat, district);
+        }
+
+        for (int i = -1; i <= 1; i += 2)
+        {
+            CreateGround("RoadEdge_" + i, new Vector3(i * 4.6f, -0.21f, 2f), new Vector3(0.18f, 0.02f, 47f), accentMat, district);
+        }
+
+        CreateGround("TruckBay", new Vector3(0f, -0.22f, 8f), new Vector3(8.4f, 0.04f, 10f), accentMat, district);
+        CreateGround("MarketPadLeft", new Vector3(-18f, -0.25f, 8f), new Vector3(12f, 0.1f, 16f), concreteMat, district);
+        CreateGround("MarketPadRight", new Vector3(18f, -0.25f, 8f), new Vector3(12f, 0.1f, 16f), concreteMat, district);
+        CreateGround("RadioPad", new Vector3(0f, -0.25f, 18f), new Vector3(14f, 0.1f, 10f), concreteMat, district);
+
+        CreateHubShop("MechanicBay", new Vector3(-18f, 0f, 10.5f), shopWallMat, shopAwningMat, neonMat, "MECHANIC BAY");
+        CreateHubShop("RadioPost", new Vector3(0f, 0f, 20f), shopWallMat, shopAwningMat, neonMat, "RADIO POST");
+        CreateHubShop("ArmoryDepot", new Vector3(18f, 0f, 10.5f), shopWallMat, shopAwningMat, neonMat, "ARMORY DEPOT");
+
+        CreateRadioTower(new Vector3(0f, 0f, 27f), shopWallMat, neonMat);
+        CreateHubLamp(new Vector3(-10f, 0f, -4f), shopWallMat, neonMat);
+        CreateHubLamp(new Vector3(10f, 0f, -4f), shopWallMat, neonMat);
+        CreateHubLamp(new Vector3(-10f, 0f, 22f), shopWallMat, neonMat);
+        CreateHubLamp(new Vector3(10f, 0f, 22f), shopWallMat, neonMat);
+
+        CreateGround("CratePile_A", new Vector3(-24f, 0.6f, 2f), new Vector3(1.4f, 1.2f, 1.4f), concreteMat, district);
+        CreateGround("CratePile_B", new Vector3(24f, 0.75f, 2f), new Vector3(1.8f, 1.5f, 1.6f), concreteMat, district);
+        CreateGround("BarrelCluster_A", new Vector3(-22f, 0.9f, 15f), new Vector3(0.8f, 1.8f, 0.8f), accentMat, district);
+        CreateGround("BarrelCluster_B", new Vector3(22f, 0.9f, 15f), new Vector3(0.8f, 1.8f, 0.8f), accentMat, district);
+    }
+
+    private static void CreateHubShop(
+        string name,
+        Vector3 center,
+        Material wallMat,
+        Material awningMat,
+        Material neonMat,
+        string signText)
+    {
+        GameObject shop = new GameObject(name);
+        Transform root = shop.transform;
+        root.position = Vector3.zero;
+
+        CreateGround("BackWall", center + new Vector3(0f, 2f, 3.4f), new Vector3(8f, 4f, 0.4f), wallMat, root);
+        CreateGround("LeftWall", center + new Vector3(-3.8f, 2f, 0f), new Vector3(0.4f, 4f, 6.8f), wallMat, root);
+        CreateGround("RightWall", center + new Vector3(3.8f, 2f, 0f), new Vector3(0.4f, 4f, 6.8f), wallMat, root);
+        CreateGround("Roof", center + new Vector3(0f, 4.1f, 0f), new Vector3(8f, 0.3f, 6.8f), wallMat, root);
+        CreateGround("Counter", center + new Vector3(0f, 0.9f, -2.2f), new Vector3(6.8f, 1.8f, 1.2f), wallMat, root);
+        CreateGround("Awning", center + new Vector3(0f, 3.1f, -2.2f), new Vector3(7.2f, 0.16f, 1.5f), awningMat, root);
+        CreateGround("SignBoard", center + new Vector3(0f, 3.6f, -2.2f), new Vector3(5.2f, 0.6f, 0.2f), neonMat, root);
+        CreateGround("ShopCrateA", center + new Vector3(-2.2f, 0.45f, -1.1f), new Vector3(1f, 0.9f, 1f), awningMat, root);
+        CreateGround("ShopCrateB", center + new Vector3(2f, 0.35f, -0.8f), new Vector3(0.8f, 0.7f, 0.8f), awningMat, root);
+
+        CreateLabel(signText, root, new Vector3(0f, 3.55f, -2.35f), 180f, new Color(0.1f, 0.08f, 0.08f), 64, 0.055f);
+    }
+
+    private static void CreateRadioTower(Vector3 basePosition, Material metalMat, Material lightMat)
+    {
+        CreateGround("RadioTower_Base", basePosition + new Vector3(0f, 1.4f, 0f), new Vector3(1.8f, 2.8f, 1.8f), metalMat, null);
+        CreateGround("RadioTower_Mid", basePosition + new Vector3(0f, 4.8f, 0f), new Vector3(1.1f, 4f, 1.1f), metalMat, null);
+        CreateGround("RadioTower_Top", basePosition + new Vector3(0f, 8.6f, 0f), new Vector3(0.7f, 3.5f, 0.7f), metalMat, null);
+        CreateGround("RadioAntenna", basePosition + new Vector3(0f, 11.8f, 0f), new Vector3(0.18f, 3f, 0.18f), lightMat, null);
+        CreateGround("RadioLight", basePosition + new Vector3(0f, 13.1f, 0f), new Vector3(0.45f, 0.45f, 0.45f), lightMat, null);
+    }
+
+    private static void CreateHubLamp(Vector3 basePosition, Material poleMat, Material lightMat)
+    {
+        CreateGround("LampPole", basePosition + new Vector3(0f, 2f, 0f), new Vector3(0.3f, 4f, 0.3f), poleMat, null);
+        CreateGround("LampArm", basePosition + new Vector3(0f, 3.85f, 0.8f), new Vector3(0.22f, 0.22f, 1.6f), poleMat, null);
+        CreateGround("LampGlow", basePosition + new Vector3(0f, 3.55f, 1.45f), new Vector3(0.42f, 0.42f, 0.42f), lightMat, null);
     }
 
     private static void CreateHubHud(HubInteractionController interactionController)
@@ -747,19 +871,31 @@ public static class ConvoyPrototypeBootstrapper
 
     private static void CreateLabel(string textValue, Transform parent, Vector3 localPosition)
     {
+        CreateLabel(textValue, parent, localPosition, 180f, Color.white, 60, 0.08f);
+    }
+
+    private static void CreateLabel(
+        string textValue,
+        Transform parent,
+        Vector3 localPosition,
+        float yRotation,
+        Color color,
+        int fontSize,
+        float characterSize)
+    {
         GameObject textObject = new GameObject("Label");
         textObject.transform.SetParent(parent, false);
         textObject.transform.localPosition = localPosition;
 
         TextMesh textMesh = textObject.AddComponent<TextMesh>();
         textMesh.text = textValue;
-        textMesh.fontSize = 60;
-        textMesh.characterSize = 0.08f;
-        textMesh.color = Color.white;
+        textMesh.fontSize = Mathf.Max(24, fontSize);
+        textMesh.characterSize = Mathf.Max(0.03f, characterSize);
+        textMesh.color = color;
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.alignment = TextAlignment.Center;
 
-        textObject.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        textObject.transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
     }
 
     private static Material CreateOrUpdateMaterial(string path, Color color)
@@ -778,8 +914,104 @@ public static class ConvoyPrototypeBootstrapper
         }
 
         material.color = color;
+        if (material.HasProperty("_BaseColor"))
+        {
+            material.SetColor("_BaseColor", color);
+        }
+
+        float smoothness = path.Contains("Neon", StringComparison.OrdinalIgnoreCase) ? 0.45f : 0.16f;
+        if (material.HasProperty("_Smoothness"))
+        {
+            material.SetFloat("_Smoothness", smoothness);
+        }
+
+        if (path.Contains("Neon", StringComparison.OrdinalIgnoreCase) && material.HasProperty("_EmissionColor"))
+        {
+            material.SetColor("_EmissionColor", color * 2.2f);
+            material.EnableKeyword("_EMISSION");
+        }
+
         EditorUtility.SetDirty(material);
         return material;
+    }
+
+    private static Texture2D CreateOrUpdateCheckerTexture(string path, Color colorA, Color colorB, int size, int cellSize)
+    {
+        int textureSize = Mathf.Max(16, size);
+        int grid = Mathf.Max(2, cellSize);
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (texture == null)
+        {
+            texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false, false);
+            texture.name = Path.GetFileNameWithoutExtension(path);
+            AssetDatabase.CreateAsset(texture, path);
+        }
+
+        for (int y = 0; y < textureSize; y++)
+        {
+            for (int x = 0; x < textureSize; x++)
+            {
+                bool even = ((x / grid) + (y / grid)) % 2 == 0;
+                texture.SetPixel(x, y, even ? colorA : colorB);
+            }
+        }
+
+        texture.wrapMode = TextureWrapMode.Repeat;
+        texture.filterMode = FilterMode.Bilinear;
+        texture.Apply(false, false);
+        EditorUtility.SetDirty(texture);
+        return texture;
+    }
+
+    private static Texture2D CreateOrUpdateStripedTexture(string path, Color baseColor, Color stripeColor, int size, int stripeWidth)
+    {
+        int textureSize = Mathf.Max(16, size);
+        int stripe = Mathf.Max(1, stripeWidth);
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (texture == null)
+        {
+            texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false, false);
+            texture.name = Path.GetFileNameWithoutExtension(path);
+            AssetDatabase.CreateAsset(texture, path);
+        }
+
+        for (int y = 0; y < textureSize; y++)
+        {
+            bool stripeLine = (y % stripe) < Mathf.Max(1, stripe / 2);
+            Color rowColor = stripeLine ? stripeColor : baseColor;
+            for (int x = 0; x < textureSize; x++)
+            {
+                texture.SetPixel(x, y, rowColor);
+            }
+        }
+
+        texture.wrapMode = TextureWrapMode.Repeat;
+        texture.filterMode = FilterMode.Bilinear;
+        texture.Apply(false, false);
+        EditorUtility.SetDirty(texture);
+        return texture;
+    }
+
+    private static void ApplyTextureToMaterial(Material material, Texture2D texture, Vector2 tiling)
+    {
+        if (material == null || texture == null)
+        {
+            return;
+        }
+
+        if (material.HasProperty("_BaseMap"))
+        {
+            material.SetTexture("_BaseMap", texture);
+        }
+
+        if (material.HasProperty("_MainTex"))
+        {
+            material.SetTexture("_MainTex", texture);
+        }
+
+        material.mainTexture = texture;
+        material.mainTextureScale = tiling;
+        EditorUtility.SetDirty(material);
     }
 
     private static void ApplyMaterial(GameObject target, Material material)

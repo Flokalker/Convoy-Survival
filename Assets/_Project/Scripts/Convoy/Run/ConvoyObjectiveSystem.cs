@@ -10,6 +10,8 @@ namespace ConvoySurvival.Run
         [SerializeField] private TruckController truck;
         [SerializeField] private GameObject waypointPrefab;
         [SerializeField, Min(2f)] private float laneWidth = 3.5f;
+        [SerializeField, Min(200f)] private float firstRadioPingMin = 500f;
+        [SerializeField, Min(300f)] private float firstRadioPingMax = 900f;
         [SerializeField, Min(1200f)] private float radioPingSpacingMin = 1800f;
         [SerializeField, Min(1600f)] private float radioPingSpacingMax = 3200f;
         [SerializeField, Min(1500f)] private float waypointDistanceAheadMin = 2200f;
@@ -44,7 +46,7 @@ namespace ConvoySurvival.Run
                 startZ = truck.transform.position.z;
             }
 
-            nextRadioDistance = Random.Range(radioPingSpacingMin, radioPingSpacingMax);
+            nextRadioDistance = Random.Range(firstRadioPingMin, firstRadioPingMax);
             SetObjectiveText("Radio: scanning channels for survivor signals.");
         }
 

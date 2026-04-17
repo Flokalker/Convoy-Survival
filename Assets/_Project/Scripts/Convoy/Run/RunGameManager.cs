@@ -18,10 +18,12 @@ namespace ConvoySurvival.Run
 
         [Header("Scenes")]
         [SerializeField] private string hubSceneName = "Hub";
+        [SerializeField] private bool showFallbackOverlay = true;
 
         private PrototypeSessionStateManager session;
         private float startZ;
         private bool runEnded;
+        private GUIStyle overlayStyle;
 
         public float DistanceMeters { get; private set; }
 
@@ -51,6 +53,10 @@ namespace ConvoySurvival.Run
         {
             session = PrototypeSessionStateManager.EnsureInstance();
             startZ = truck != null ? truck.transform.position.z : 0f;
+            if (hud == null)
+            {
+                hud = Object.FindAnyObjectByType<RunHudController>();
+            }
 
             ApplySessionUpgradeToTruck();
 
@@ -142,7 +148,18 @@ namespace ConvoySurvival.Run
             }
 
             LockCursor(false);
-            SceneManager.LoadScene(hubSceneName);
+            if (Application.CanStreamedLevelBeLoaded(hubSceneName))
+            {
+                SceneManager.LoadScene(hubSceneName);
+                return;
+            }
+
+            Debug.LogError("Hub scene '" + hubSceneName + "' is not loadable. Add it to Build Settings or run the bootstrap tool.");
+            runEnded = false;
+            if (truck != null)
+            {
+                truck.SetMovementEnabled(true);
+            }
         }
 
         private void ApplySessionUpgradeToTruck()
@@ -161,6 +178,41 @@ namespace ConvoySurvival.Run
         {
             Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
             Cursor.visible = !locked;
+        }
+
+        private void OnGUI()
+        {
+            bool hasActiveHud = hud != null && hud.isActiveAndEnabled && hud.gameObject.activeInHierarchy;
+            if (!showFallbackOverlay || hasActiveHud)
+            {
+                return;
+            }
+
+            if (overlayStyle == null)
+            {
+                overlayStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 16,
+                    normal = { textColor = Color.white },
+                    wordWrap = true
+                };
+            }
+
+            string objective = objectiveSystem != null ? objectiveSystem.CurrentObjectiveText : "No objective system";
+            string fuel = truck != null ? truck.CurrentFuel.ToString("0") + "/" + truck.MaxFuel.ToString("0") : "-";
+            string trading = tradingPostSystem != null && tradingPostSystem.IsOpen
+                ? "Trading post active: press Enter/E/Space to continue"
+                : "Backspace = return to hub";
+
+            Rect box = new Rect(12f, 12f, 700f, 150f);
+            GUI.Box(box, string.Empty);
+            GUI.Label(
+                new Rect(24f, 20f, 680f, 136f),
+                "Distance: " + DistanceMeters.ToString("0") + "m\n" +
+                "Fuel: " + fuel + "\n" +
+                "Objective: " + objective + "\n" +
+                trading,
+                overlayStyle);
         }
     }
 }

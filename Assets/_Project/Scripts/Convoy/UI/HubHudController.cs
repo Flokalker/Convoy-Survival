@@ -42,6 +42,7 @@ namespace ConvoySurvival.Hub
                 helpText.text =
                     "Hub Controls:\n" +
                     "WASD = Move, Mouse = Look, E = Interact\n" +
+                    "Shops: Mechanic (Tank), Radio (Scout), Armory (Fortress)\n" +
                     "Stations: choose path + buy upgrades with scrap\n" +
                     "Enter truck to start MainRun";
             }

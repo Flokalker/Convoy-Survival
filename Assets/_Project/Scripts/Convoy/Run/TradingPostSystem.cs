@@ -10,9 +10,11 @@ namespace ConvoySurvival.Run
     public class TradingPostSystem : MonoBehaviour
     {
         [SerializeField] private TruckController truck;
+        [SerializeField, Min(0f)] private float autoContinueAfterSeconds = 12f;
 
         private PrototypeSessionStateManager session;
         private string statusMessage = string.Empty;
+        private float openedTimestamp = -1f;
 
         public bool IsOpen { get; private set; }
         public event Action Opened;
@@ -49,9 +51,9 @@ namespace ConvoySurvival.Run
                        "Weakness: " + weakness + "\n" +
                        "1 = Upgrade current path (" + costText + ")\n" +
                        "2 = Tank, 3 = Scout, 4 = Fortress\n" +
-                       "Enter = Open gate / continue run\n" +
+                       "Enter / E / Space = Open gate / continue run\n" +
                        "Scrap: " + session.Currency.Scrap + "\n" +
-                       statusMessage;
+                       statusMessage + BuildAutoContinueLine();
             }
         }
 
@@ -70,6 +72,17 @@ namespace ConvoySurvival.Run
             if (!IsOpen)
             {
                 return;
+            }
+
+            if (autoContinueAfterSeconds > 0f && openedTimestamp > 0f)
+            {
+                float elapsed = Time.time - openedTimestamp;
+                if (elapsed >= autoContinueAfterSeconds)
+                {
+                    statusMessage = "Safe zone timed out. Gate opened.";
+                    CloseTradingPost();
+                    return;
+                }
             }
 
             Keyboard keyboard = Keyboard.current;
@@ -98,7 +111,10 @@ namespace ConvoySurvival.Run
                 SetSpecialization(TruckSpecialization.Fortress);
             }
 
-            if (keyboard.enterKey.wasPressedThisFrame)
+            if (keyboard.enterKey.wasPressedThisFrame ||
+                keyboard.eKey.wasPressedThisFrame ||
+                keyboard.spaceKey.wasPressedThisFrame ||
+                keyboard.escapeKey.wasPressedThisFrame)
             {
                 CloseTradingPost();
             }
@@ -113,6 +129,7 @@ namespace ConvoySurvival.Run
 
             IsOpen = true;
             statusMessage = "Select an option.";
+            openedTimestamp = Time.time;
             if (truck != null)
             {
                 truck.SetMovementEnabled(false);
@@ -130,6 +147,7 @@ namespace ConvoySurvival.Run
 
             IsOpen = false;
             statusMessage = string.Empty;
+            openedTimestamp = -1f;
             if (truck != null)
             {
                 truck.SetMovementEnabled(true);
@@ -182,6 +200,17 @@ namespace ConvoySurvival.Run
             TruckSpecialization specialization = session.Upgrades.ActiveSpecialization;
             TruckUpgradeTier tier = session.Upgrades.GetActiveTier(session.UpgradeCatalog);
             truck.ApplyTier(specialization, tier);
+        }
+
+        private string BuildAutoContinueLine()
+        {
+            if (autoContinueAfterSeconds <= 0f || openedTimestamp <= 0f)
+            {
+                return string.Empty;
+            }
+
+            float remaining = Mathf.Max(0f, autoContinueAfterSeconds - (Time.time - openedTimestamp));
+            return "\nAuto continue in: " + remaining.ToString("0") + "s";
         }
     }
 }
