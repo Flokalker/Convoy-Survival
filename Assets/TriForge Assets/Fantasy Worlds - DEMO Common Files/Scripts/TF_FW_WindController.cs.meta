@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 11447dd52b20f224c8144bfc3a51ba6d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282610
+  packageName: Fantasy Worlds - The Old Forest - Free Demo
+  packageVersion: 1.0
+  assetPath: Assets/TriForge Assets/Fantasy Worlds - DEMO Common Files/Scripts/TF_FW_WindController.cs
+  uploadId: 657969
