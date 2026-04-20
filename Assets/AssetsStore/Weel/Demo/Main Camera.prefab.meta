@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 87d6ece282c12ef43b920eb59f46aa98
+timeCreated: 1522262507
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 115166
+  packageName: The village well
+  packageVersion: 1.0
+  assetPath: Assets/AssetsStore/Weel/Demo/Main Camera.prefab
+  uploadId: 238023
